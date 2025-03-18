@@ -17,7 +17,7 @@
           let
             nix-versions = pkgs.buildGoModule {
               pname = "nix-versions";
-              version = "1.0.0";
+              version = builtins.readFile ./VERSION;
               src = ./src;
               vendorHash = "sha256-asGQka4gkEHMLz/lncQwS4liugOIqVCh1H6dB3+snoQ=";
               meta = with pkgs.lib; {
