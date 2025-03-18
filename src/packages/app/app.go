@@ -19,7 +19,7 @@ func App() cli.App {
 		HideHelpCommand: true,
 		Action:          mainAction,
 		Authors: []*cli.Author{
-			&cli.Author{
+			{
 				Name:  "Victor Hugo Borja",
 				Email: "vborja@apache.org",
 			},
@@ -82,13 +82,13 @@ func App() cli.App {
 			&cli.BoolFlag{
 				Name:     "reverse",
 				Category: "FILTERING",
-				Usage:    "New versions last",
+				Usage:    "New versions first",
 				Value:    false,
 			},
-			&cli.UintFlag{
+			&cli.IntFlag{
 				Name:     "limit",
 				Category: "FILTERING",
-				Usage:    "Limit to a number of results. eg: `10`",
+				Usage:    "Limit to a number of results. `1` means only last and `-1` only first.",
 				Value:    0,
 			},
 			&cli.StringFlag{
@@ -131,9 +131,8 @@ func mainAction(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if ctx.Uint("limit") > 0 {
-		upto := min(len(versions), ctx.Int("limit"))
-		versions = versions[:upto]
+	if ctx.Int("limit") != 0 {
+		versions = lib.Limit(versions, ctx.Int("limit"))
 	}
 	if ctx.Bool("json") {
 		str, err = lib.VersionsJson(versions)

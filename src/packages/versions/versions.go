@@ -28,11 +28,26 @@ func (a ByVersion) Less(i, j int) bool {
 	if err != nil {
 		return false
 	}
-	return x.GreaterThan(y)
+	return x.LessThan(y)
 }
 
 func SortByVersion(versions []Version) {
 	sort.Sort(ByVersion(versions))
+}
+
+// Positive numbers take the last `n` items from list.
+// Negative numbers tatke the first `n` items from list
+func Limit(versions []Version, n int) []Version {
+	if n > 0 {
+		from := max(len(versions)-n, 0)
+		to := min(len(versions)-1, (from + n))
+		return versions[from : to+1]
+	} else if n < 0 {
+		n := n * -1
+		to := min(n, len(versions))
+		return versions[0:to]
+	}
+	return versions
 }
 
 func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
