@@ -153,7 +153,7 @@ func findVersions(ctx *cli.Context, name string) ([]lib.Version, error) {
 		}
 		return findVersionsAll(ctx, pkgs)
 	}
-	if strings.HasPrefix(constraint, "latest") {
+	if strings.Contains(constraint, "latest") {
 		constraint = strings.Replace(constraint, "latest", "", 1)
 		limit = 1
 		sort = true
