@@ -2,7 +2,8 @@
 
 This is a minimal CLI app written in Go that interfaces with [https://lazamar.co.uk/nix-versions/](https://lazamar.co.uk/nix-versions/) and [nixhub](https://nixhub.io).
 
-## Usage
+
+## Installation
 
 ```
 # Use directly from flake
@@ -68,3 +69,48 @@ GLOBAL OPTIONS:
    --lazamar        Use https://lazamar.co.uk/nix-versions as backend (default: true)
    --nixhub         Use https://www.nixhub.io/ as backend (default: false)
 ```
+
+## Finding the attribute path.
+
+Packages in the `nixpkgs` repository are stored in a tree of nix expressions and
+are accessed via an attribute path -the keys in that tree- that leads to their derivation -their recipe for building and installation-.
+
+So for example `GNU Emacs` can be found directly via the `emacs` attribute path.
+Most programs have simple, guessable attribute paths. However others like `pip` must
+be qualified like `python313Packages.pip` or `python312Packages.pip` for compatibility with their runtimes.
+
+If you need help finding what the attribute path is for something you need.
+
+You have several options:
+
+* Use the `nix-search-cli` package.
+
+```
+nix run nixpkgs#nix-search-cli  -- --help
+
+# Search those packages with name or description matching emacs
+nix run nixpkgs#nix-search-cli  -- emacs
+
+# Search which packages provide bin/emacs executable.
+nix run nixpkgs#nix-search-cli  -- --program emacs
+```
+
+* Use the `nix search` builtin command.
+
+```shell
+nix search emacs
+```
+
+* Official search https://search.nixos.org/packages
+
+Actually `nix-search-cli` is an CLI interface to this.
+
+
+Once you know the attribute path for the package you need, you can use `nix-versions` to search which nixpkgs revision corresponded to each particular package version.
+
+
+## Motivation
+
+* `nixpkgs` is an outstanding repository of programs, some say it's the largest most up-to-date repository. However since nixpkgs is only a repo of receipes, it will likely only contain the most recent version of a package. That's why sites like lazamar's and nixhub help searching for historic revisions of nixpkgs that used to contain a particular program version.
+
+* I'm trying to use this CLI app to help other utilities find previous versions of nixpkgs programs.
