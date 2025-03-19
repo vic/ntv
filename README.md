@@ -2,7 +2,6 @@
 
 This is a minimal CLI app written in Go that interfaces with [https://lazamar.co.uk/nix-versions/](https://lazamar.co.uk/nix-versions/) and [nixhub](https://nixhub.io).
 
-
 ## Installation
 
 ```
@@ -83,7 +82,7 @@ If you need help finding what the attribute path is for something you need.
 
 You have several options:
 
-* Use the `nix-search-cli` package.
+- Use the `nix-search-cli` package.
 
 ```
 nix run nixpkgs#nix-search-cli  -- --help
@@ -95,22 +94,20 @@ nix run nixpkgs#nix-search-cli  -- emacs
 nix run nixpkgs#nix-search-cli  -- --program emacs
 ```
 
-* Use the `nix search` builtin command.
+- Use the `nix search` builtin command.
 
 ```shell
 nix search emacs
 ```
 
-* Official search https://search.nixos.org/packages
+- Official search https://search.nixos.org/packages
 
 Actually `nix-search-cli` is an CLI interface to this.
 
-
 Once you know the attribute path for the package you need, you can use `nix-versions` to search which nixpkgs revision corresponded to each particular package version.
-
 
 ## Motivation
 
-* `nixpkgs` is an outstanding repository of programs, some say it's the largest most up-to-date repository. However since nixpkgs is only a repo of receipes, it will likely only contain the most recent version of a package. That's why sites like lazamar's and nixhub help searching for historic revisions of nixpkgs that used to contain a particular program version.
+- `nixpkgs` is an outstanding repository of programs, some say it's the largest most up-to-date repository. However since nixpkgs is only a repo of receipes, it will likely only contain the most recent version of a package. That's why sites like lazamar's and nixhub help searching for historic revisions of nixpkgs that used to contain a particular program version.
 
-* I'm trying to use this CLI app to help other utilities find previous versions of nixpkgs programs.
+- I'm trying to use this CLI app to help other utilities find previous versions of nixpkgs programs.
