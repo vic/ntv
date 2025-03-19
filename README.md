@@ -22,7 +22,7 @@ nix-versions emacs
 # Return only the most recent version
 nix-versions --limit 1 emacs
 
-# Only versions between 24 and 27. Output JSON
+# Only versions between 25 and 27. Output JSON
 nix-versions --constraint '>= 25 <= 27' --json emacs
 
 # Latest of 29 series.
@@ -36,6 +36,15 @@ nix-versions --nixhub --sort=false python312Packages.pip
 
 # Use release channel `nixpkgs/nixos-24.05` (using lazamar search)
 nix-versions --channel nixos-24.05 python312Packages.pip
+
+# NixHub.io has rate-limits but will likely have indexed more recent versions.
+# https://www.jetify.com/docs/nixhub/#rate-limits
+nix-versions --nixhub --limit 1 bun
+1.2.5    bun        573c650e8a14b2faa0041645ab18aed7e60f0c9a
+
+# https://lazamar.co.uk/nix-versions/ has no rate-limit, we scrap the webpage.
+nix-versions --lazamar --limit 1 bun
+1.1.43   bun        21808d22b1cda1898b71cf1a1beb524a97add2c4
 ```
 
 #### nix-versions --help
