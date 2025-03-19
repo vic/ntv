@@ -68,6 +68,16 @@ func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
 	return res, nil
 }
 
+func Exact(versions []Version, attrPath string) []Version {
+	var res []Version
+	for _, ver := range versions {
+		if ver.Attribute == attrPath {
+			res = append(res, ver)
+		}
+	}
+	return res
+}
+
 func VersionsJson(versions []Version) (string, error) {
 	if len(versions) == 0 {
 		return "", nil

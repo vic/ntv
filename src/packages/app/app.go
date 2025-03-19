@@ -85,6 +85,12 @@ func App() cli.App {
 				Usage:    "New versions first",
 				Value:    false,
 			},
+			&cli.BoolFlag{
+				Name:     "exact",
+				Category: "FILTERING",
+				Usage:    "Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME",
+				Value:    true,
+			},
 			&cli.IntFlag{
 				Name:     "limit",
 				Category: "FILTERING",
@@ -111,13 +117,18 @@ func mainAction(ctx *cli.Context) error {
 		str      string
 	)
 
+	pkgAttr := ctx.Args().First()
+
 	if ctx.Bool("lazamar") {
-		versions, err = lazamar.Versions(ctx.Args().First(), ctx.String("channel"))
+		versions, err = lazamar.Versions(pkgAttr, ctx.String("channel"))
 	} else {
-		versions, err = nixhub.Versions(ctx.Args().First())
+		versions, err = nixhub.Versions(pkgAttr)
 	}
 	if err != nil {
 		return err
+	}
+	if ctx.Bool("exact") {
+		versions = lib.Exact(versions, pkgAttr)
 	}
 	if ctx.String("constraint") != "" {
 		versions, err = lib.ConstraintBy(versions, ctx.String("constraint"))
