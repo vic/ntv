@@ -1,9 +1,11 @@
 package app
 
 import (
+	_ "embed"
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 	"github.com/vic/nix-versions/packages/lazamar"
@@ -11,103 +13,145 @@ import (
 	lib "github.com/vic/nix-versions/packages/versions"
 )
 
+//go:embed HELP
+var AppHelpTemplate string
+
+//go:embed VERSION
+var AppVersion string
+
+//go:embed REVISION
+var AppRevision string
+
 func App() cli.App {
+	cli.AppHelpTemplate = AppHelpTemplate
 	return cli.App{
-		Name:            "nix-versions",
-		Usage:           "show available nix packages versions",
-		ArgsUsage:       "PKG_ATTRIBUTE_NAME",
-		HideHelpCommand: true,
-		Action:          mainAction,
-		Authors: []*cli.Author{
-			{
-				Name:  "Victor Hugo Borja",
-				Email: "vborja@apache.org",
-			},
-		},
+		Action: mainAction,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:     "lazamar",
-				Value:    true,
-				Category: "NIX VERSIONS BACKEND",
-				Usage:    "Use https://lazamar.co.uk/nix-versions as backend",
+				Name: "version",
+			},
+			&cli.BoolFlag{
+				Name:  "lazamar",
+				Value: true,
 				Action: func(ctx *cli.Context, b bool) error {
 					ctx.Set("nixhub", strconv.FormatBool(!b))
 					return nil
 				},
 			},
 			&cli.StringFlag{
-				Name:     "channel",
-				Value:    "nixpkgs-unstable",
-				Category: "NIX VERSIONS BACKEND",
-				Usage:    "Nixpkgs channel for lazamar backend. Enables lazamar when set.",
+				Name:  "channel",
+				Value: "nixpkgs-unstable",
 				Action: func(ctx *cli.Context, b string) error {
 					ctx.Set("nixhub", "false")
 					return nil
 				},
 			},
 			&cli.BoolFlag{
-				Name:     "nixhub",
-				Category: "NIX VERSIONS BACKEND",
-				Usage:    "Use https://www.nixhub.io/ as backend",
+				Name: "nixhub",
 				Action: func(ctx *cli.Context, b bool) error {
 					ctx.Set("lazamar", strconv.FormatBool(!b))
 					return nil
 				},
 			},
 			&cli.BoolFlag{
-				Name:     "json",
-				Category: "FORMAT",
-				Usage:    "Output JSON array of versions",
+				Name: "json",
 				Action: func(ctx *cli.Context, b bool) error {
 					ctx.Set("text", strconv.FormatBool(!b))
 					return nil
 				},
 			},
 			&cli.BoolFlag{
-				Name:     "text",
-				Category: "FORMAT",
-				Usage:    "Output text table of versions",
-				Value:    true,
+				Name:  "text",
+				Value: true,
 				Action: func(ctx *cli.Context, b bool) error {
 					ctx.Set("json", strconv.FormatBool(!b))
 					return nil
 				},
 			},
 			&cli.BoolFlag{
-				Name:     "sort",
-				Category: "FILTERING",
-				Usage:    "Sorted by version instead of using backend ordering",
-				Value:    true,
+				Name:  "sort",
+				Value: true,
 			},
 			&cli.BoolFlag{
-				Name:     "reverse",
-				Category: "FILTERING",
-				Usage:    "New versions first",
-				Value:    false,
+				Name:  "reverse",
+				Value: false,
 			},
 			&cli.BoolFlag{
-				Name:     "exact",
-				Category: "FILTERING",
-				Usage:    "Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME",
-				Value:    true,
+				Name:  "exact",
+				Value: true,
 			},
 			&cli.IntFlag{
-				Name:     "limit",
-				Category: "FILTERING",
-				Usage:    "Limit to a number of results. `1` means only last and `-1` only first.",
-				Value:    0,
+				Name:  "limit",
+				Value: 0,
 			},
 			&cli.StringFlag{
-				Name:     "constraint",
-				Category: "FILTERING",
-				Usage:    "Version constraint. eg: `'~1.0'`. See github.com/Masterminds/semver",
+				Name: "constraint",
 			},
 		},
 	}
 }
 
+func findVersions(ctx *cli.Context, name string) ([]lib.Version, error) {
+	var (
+		err        error
+		versions   []lib.Version
+		constraint = ctx.String("constraint")
+		limit      = ctx.Int("limit")
+		sort       = ctx.Bool("sort")
+		reverse    = ctx.Bool("reverse")
+		pkgAttr    = name
+	)
+	if strings.Contains(name, "@") {
+		constraint = name[strings.Index(name, "@")+1:]
+		pkgAttr = name[:strings.Index(name, "@")]
+	}
+	if constraint == "latest" {
+		constraint = ""
+		limit = 1
+		sort = true
+		reverse = false
+	}
+	if ctx.Bool("lazamar") {
+		versions, err = lazamar.Versions(pkgAttr, ctx.String("channel"))
+	} else {
+		versions, err = nixhub.Versions(pkgAttr)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if ctx.Bool("exact") {
+		versions = lib.Exact(versions, pkgAttr)
+	}
+	if constraint != "" {
+		versions, err = lib.ConstraintBy(versions, constraint)
+	}
+	if sort {
+		lib.SortByVersion(versions)
+	}
+	if reverse {
+		slices.Reverse(versions)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if limit != 0 {
+		versions = lib.Limit(versions, limit)
+	}
+	return versions, nil
+}
+
 func mainAction(ctx *cli.Context) error {
-	if ctx.Args().Len() != 1 {
+	if ctx.Bool("version") {
+		fmt.Print(strings.TrimSpace(AppVersion))
+		revision := strings.TrimSpace(AppRevision)
+		if revision != "" {
+			fmt.Printf(" (%s)", revision)
+		}
+		fmt.Println()
+		return nil
+	}
+
+	if ctx.Args().Len() < 1 {
 		cli.ShowAppHelpAndExit(ctx, 1)
 		return nil
 	}
@@ -117,42 +161,23 @@ func mainAction(ctx *cli.Context) error {
 		str      string
 	)
 
-	pkgAttr := ctx.Args().First()
+	for _, name := range ctx.Args().Slice() {
+		vers, err := findVersions(ctx, name)
+		if err != nil {
+			return err
+		}
+		versions = append(versions, vers...)
+	}
 
-	if ctx.Bool("lazamar") {
-		versions, err = lazamar.Versions(pkgAttr, ctx.String("channel"))
-	} else {
-		versions, err = nixhub.Versions(pkgAttr)
-	}
-	if err != nil {
-		return err
-	}
-	if ctx.Bool("exact") {
-		versions = lib.Exact(versions, pkgAttr)
-	}
-	if ctx.String("constraint") != "" {
-		versions, err = lib.ConstraintBy(versions, ctx.String("constraint"))
-	}
-	if ctx.Bool("sort") {
-		lib.SortByVersion(versions)
-	}
-	if ctx.Bool("reverse") {
-		slices.Reverse(versions)
-	}
-	if err != nil {
-		return err
-	}
-	if ctx.Int("limit") != 0 {
-		versions = lib.Limit(versions, ctx.Int("limit"))
-	}
 	if ctx.Bool("json") {
 		str, err = lib.VersionsJson(versions)
+		if err != nil {
+			return err
+		}
 	} else {
 		str = lib.VersionsTable(versions)
 	}
-	if err != nil {
-		return err
-	}
+
 	fmt.Println(str)
 	return nil
 }
