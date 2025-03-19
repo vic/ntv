@@ -11,3 +11,7 @@ devenv.local.nix
 
 # executable
 nix-versions
+
+# go
+vendor
+nix-versions
