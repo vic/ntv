@@ -28,6 +28,9 @@ nix-versions --constraint '>= 25 <= 27' --json emacs
 # Latest of 29 series.
 nix-versions --constraint '~29' --limit 1 emacs
 
+# Also include emacs-nox and others
+nix-versions --exact=false emacs
+
 # Show versions of pip from nixhub.io in the order that nixhub returns them
 nix-versions --nixhub --sort=false python312Packages.pip
 
@@ -53,6 +56,7 @@ GLOBAL OPTIONS:
    FILTERING
 
    --constraint '~1.0'  Version constraint. eg: '~1.0'. See github.com/Masterminds/semver
+   --exact              Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME (default: true)
    --limit 1            Limit to a number of results. 1 means only last and `-1` only first. (default: 0)
    --reverse            New versions first (default: false)
    --sort               Sorted by version instead of using backend ordering (default: true)
