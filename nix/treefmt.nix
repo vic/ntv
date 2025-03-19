@@ -13,7 +13,7 @@
         programs.gofmt.enable = true;
       };
       treefmt-wrapper = treefmt.config.build.wrapper;
-      treefmt-check = treefmt.config.build.check inputs.self;
+      treefmt-check = treefmt.config.build.check ./..;
     in
     {
       packages.treefmt = treefmt-wrapper;
