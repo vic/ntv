@@ -4,13 +4,17 @@ This is a minimal CLI app written in Go that interfaces with [https://lazamar.co
 
 ## Installation
 
-```
-# Use directly from flake
-nix run github:vic/nix-versions -- --help
+Install with nix
 
-# or install it on your profile.
+```
 nix profile install github:vic/nix-versions
 nix-versions --help
+```
+
+Or use directly from github
+
+```
+nix run github:vic/nix-versions -- --help
 ```
 
 #### Examples
@@ -18,6 +22,14 @@ nix-versions --help
 ```
 # List known versions of emacs
 nix-versions emacs
+
+# Latest versions of packages providing
+#   the `emacsclient` program. (eg. emacs-nox, emacs-gtk, emacs)
+#   the `pip` binary. (eg. python312Packages.pip, python313Packages.pip)
+nix-versions bin/pip@latest bin/emacsclient@latest
+
+# Any package having a binary that contains `rust` on its name
+nix-versions --exact=false bin/rust@latest
 
 # Return only the most recent version
 nix-versions --limit 1 emacs

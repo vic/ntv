@@ -11,6 +11,7 @@ devenv.local.nix
 
 # executable
 nix-versions
+result
 
 # go
 vendor

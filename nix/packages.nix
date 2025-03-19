@@ -11,6 +11,11 @@
           description = "CLI for searching nix packages versions using lazamar or nixhub, written in Go";
           homepage = "https://github.com/vic/nix-versions";
         };
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postInstall = ''
+          wrapProgram $out/bin/nix-versions \
+            --prefix PATH : ${with pkgs; lib.makeBinPath [ nix ]}
+        '';
       };
 
     in
