@@ -16,7 +16,8 @@ OPTIONS:
                           'emacs@^25.x'        - Show all Emacs in the `25.x` series.
                           'emacs@>= 25 <= 27'  - Show all Emacs in the `25.x`-`27.x` series.
                           'emacs@latest'       - Only show the most recent emacs.
-                          'emacs@latest:29'    - Only show the most recent emacs of the `29` series
+                          'emacs@latest<25'    - Only show the latest emacs before the `25` series
+                          'emacs@latest~29'    - Only show the most recent emacs of the `29` series
 
    --exact              Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME (default: true)
    --limit n            Limit to a number of results. 1 means only last and `-1` only first. (default: 0)

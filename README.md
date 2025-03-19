@@ -17,7 +17,7 @@ nix-versions --help
 
 ```
 # List known versions of emacs
-nix-versions emacs 
+nix-versions emacs
 
 # Return only the most recent version
 nix-versions --limit 1 emacs
@@ -39,34 +39,40 @@ nix-versions --channel nixos-24.05 python312Packages.pip
 
 # NixHub.io has rate-limits but will likely have indexed more recent versions.
 # https://www.jetify.com/docs/nixhub/#rate-limits
-nix-versions --nixhub --limit 1 bun
+nix-versions --nixhub bun@latest
 1.2.5    bun        573c650e8a14b2faa0041645ab18aed7e60f0c9a
 
 # https://lazamar.co.uk/nix-versions/ has no rate-limit, we scrap the webpage.
-nix-versions --lazamar --limit 1 bun
+nix-versions --lazamar bun@latest
 1.1.43   bun        21808d22b1cda1898b71cf1a1beb524a97add2c4
 ```
 
 #### nix-versions --help
 
 ```
-NAME:
-   nix-versions - show available nix packages versions
+nix-versions - show available nix packages versions
 
 USAGE:
-   nix-versions [global options] PKG_ATTRIBUTE_NAME
+   nix-versions [options] PKG_ATTRIBUTE_NAME...
 
-AUTHOR:
-   Victor Hugo Borja <vborja@apache.org>
-
-GLOBAL OPTIONS:
-   --help, -h  show help
+OPTIONS:
+   --help, -h  show help and exit
+   --version   show version and exit
 
    FILTERING
 
-   --constraint '~1.0'  Version constraint. eg: '~1.0'. See github.com/Masterminds/semver
+   --constraint         Only include results that match a versions constraint. eg: '~1.0'.
+                        See https://github.com/Masterminds/semver?tab=readme-ov-file#basic-comparisons
+
+                        Constraint can also be part of PKG_ATTRIBUTE_NAME if it contains an `@` symbol.
+                          'emacs@^25.x'        - Show all Emacs in the `25.x` series.
+                          'emacs@>= 25 <= 27'  - Show all Emacs in the `25.x`-`27.x` series.
+                          'emacs@latest'       - Only show the most recent emacs.
+                          'emacs@latest<25'    - Only show the latest emacs before the `25` series
+                          'emacs@latest~29'    - Only show the most recent emacs of the `29` series
+
    --exact              Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME (default: true)
-   --limit 1            Limit to a number of results. 1 means only last and `-1` only first. (default: 0)
+   --limit n            Limit to a number of results. 1 means only last and `-1` only first. (default: 0)
    --reverse            New versions first (default: false)
    --sort               Sorted by version instead of using backend ordering (default: true)
 
@@ -80,31 +86,9 @@ GLOBAL OPTIONS:
    --channel value  Nixpkgs channel for lazamar backend. Enables lazamar when set. (default: "nixpkgs-unstable")
    --lazamar        Use https://lazamar.co.uk/nix-versions as backend (default: true)
    --nixhub         Use https://www.nixhub.io/ as backend (default: false)
-```
 
-## Finding the attribute path.
-
-Packages in the `nixpkgs` repository are stored in a tree of nix expressions and
-are accessed via an attribute path -the keys in that tree- that leads to their derivation -their recipe for building and installation-.
-
-So for example `GNU Emacs` can be found directly via the `emacs` attribute path.
-Most programs have simple, guessable attribute paths. However others like `pip` must
-be qualified like `python313Packages.pip` or `python312Packages.pip` for compatibility with their runtimes.
-
-If you need help finding what the attribute path is for something you need.
-
-You have several options:
-
-- Use the `nix-search-cli` package.
-
-```
-nix run nixpkgs#nix-search-cli  -- --help
-
-# Search those packages with name or description matching emacs
-nix run nixpkgs#nix-search-cli  -- emacs
-
-# Search which packages provide bin/emacs executable.
-nix run nixpkgs#nix-search-cli  -- --program emacs
+Made with <3 by vic [https://x.com/oeiuwq].
+See https://github.com/vic/nix-versions for examples and reporting issues.
 ```
 
 - Use the `nix search` builtin command.

@@ -105,8 +105,8 @@ func findVersions(ctx *cli.Context, name string) ([]lib.Version, error) {
 		constraint = name[strings.Index(name, "@")+1:]
 		pkgAttr = name[:strings.Index(name, "@")]
 	}
-	if constraint == "latest" {
-		constraint = ""
+	if strings.HasPrefix(constraint, "latest") {
+		constraint = strings.Replace(constraint, "latest", "", 1)
 		limit = 1
 		sort = true
 		reverse = false

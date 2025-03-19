@@ -16,7 +16,7 @@
       treefmt-check = treefmt.config.build.check ./..;
     in
     {
-      packages.treefmt = treefmt-wrapper;
+      formatter = treefmt-wrapper;
       checks.treefmt = treefmt-check;
     }
   );
