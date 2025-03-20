@@ -146,15 +146,15 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 	}
 	if constraint != "" {
 		versions, err = lib.ConstraintBy(versions, constraint)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if sort {
 		lib.SortByVersion(versions)
 	}
 	if reverse {
 		slices.Reverse(versions)
-	}
-	if err != nil {
-		return nil, err
 	}
 	if limit != 0 {
 		versions = lib.Limit(versions, limit)
