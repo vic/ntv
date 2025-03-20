@@ -31,6 +31,7 @@ Or use directly from github
 # List known versions of emacs
 > nix-versions emacs
 
+
 # Latest versions of packages providing some executable programs.
 #   packages providing `emacsclient`. (eg. emacs-nox, emacs-gtk, emacs)
 #   packages providing `pip`. (eg. python312Packages.pip, python313Packages.pip)
@@ -57,30 +58,53 @@ Version     Attribute                        Nixpkgs-Revision
 2017-10-29  rustup                           28e0126876d688cf5fd15da1c73fbaba256574f0
 2.3.0       rustscan                         21808d22b1cda1898b71cf1a1beb524a97add2c4
 
+
+# Packages matching the `cursor editor` query on search.nixos.org
+> nix-versions '~ cursor editor'@latest
+Version   Attribute                     Nixpkgs-Revision
+0.45.14   code-cursor                   0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+0.12.9    editorconfig-core-c           d9b69c3ec2a2e2e971c534065bdd53374bd68b97
+0.3.2.0   haskellPackages.cursor        2d068ae5c6516b2d04562de50a58c682540de9bf
+3.2.1     editorconfig-checker          8f76cf16b17c51ae0cc8e55488069593f6dab645
+0.3.0.0   haskellPackages.cursor-gen    98bb5b77c8c6666824a4c13d23befa1e07210ef1
+20180228  edit                          29bcead8405cfe4c00085843eb372cc43837bb9d
+1.0.8     editres                       2d068ae5c6516b2d04562de50a58c682540de9bf
+0.1.0.1   haskellPackages.cursor-brick  2d068ae5c6516b2d04562de50a58c682540de9bf
+1.1       cursewords                    2d068ae5c6516b2d04562de50a58c682540de9bf
+0.2       curseradio                    0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+
+
 # Return only the most recent version
 > nix-versions --limit 1 emacs
+
 
 # Only versions between 25 and 27. Output JSON
 # same as 'emacs@>= 25 <= 27'
 > nix-versions --constraint '>= 25 <= 27' --json emacs
 
+
 # Latest of 29 series.
 # same as 'emacs@latest~29'
 > nix-versions --constraint '~29' --limit 1 emacs
 
+
 # Do not include emacs-nox and emacs-gtk
 > nix-versions --exact emacs
+
 
 # Show versions of pip from nixhub.io in the order that nixhub returns them
 > nix-versions --nixhub --sort=false python312Packages.pip
 
+
 # Use release channel `nixpkgs/nixos-24.05` (using lazamar search)
 > nix-versions --channel nixos-24.05 python312Packages.pip
+
 
 # NixHub.io has rate-limits but will likely have indexed more recent versions.
 # https://www.jetify.com/docs/nixhub/#rate-limits
 > nix-versions --nixhub bun@latest
 1.2.5    bun        573c650e8a14b2faa0041645ab18aed7e60f0c9a
+
 
 # https://lazamar.co.uk/nix-versions/ has no rate-limit, we scrap the webpage.
 > nix-versions --lazamar bun@latest
@@ -102,7 +126,7 @@ PKG_ATTRIBUTE_NAME:
    If you don't know the attribute name, you can search for packages
    by query (prefixed by `~`) or by program name (prefixed by `bin/`).
 
-   For example `~ git porcelain` will search the index at search.nixos.org for
+   For example `~ cursor editor` will search the index at search.nixos.org for
    packages that match the query.
 
    And using `bin/pip` will search for packages that provide that program.

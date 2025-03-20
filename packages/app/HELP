@@ -10,7 +10,7 @@ PKG_ATTRIBUTE_NAME:
    If you don't know the attribute name, you can search for packages
    by query (prefixed by `~`) or by program name (prefixed by `bin/`).
 
-   For example `~ git porcelain` will search the index at search.nixos.org for
+   For example `~ cursor editor` will search the index at search.nixos.org for
    packages that match the query.
 
    And using `bin/pip` will search for packages that provide that program.
