@@ -28,9 +28,10 @@ type CliArgs struct {
 	OnNixHub   func()       `long:"nixhub"`
 	OnJson     func()       `long:"json"`
 	OnText     func()       `long:"text"`
+	OnFlake    func()       `long:"flake"`
 	Lazamar    bool
 	Channel    string
-	Json       bool
+	OutFmt     string
 	Sort       bool   `long:"sort"`
 	Reverse    bool   `long:"reverse"`
 	Exact      bool   `long:"exact"`
@@ -42,6 +43,7 @@ type CliArgs struct {
 func ParseCliArgs(args []string) (CliArgs, error) {
 	var cliArgs = CliArgs{
 		Channel: "nixpkgs-unstable",
+		OutFmt:  "text",
 		Sort:    true,
 	}
 	cliArgs.OnHelp = func() {
@@ -68,10 +70,13 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 		cliArgs.Lazamar = true
 	}
 	cliArgs.OnJson = func() {
-		cliArgs.Json = true
+		cliArgs.OutFmt = "json"
 	}
 	cliArgs.OnText = func() {
-		cliArgs.Json = false
+		cliArgs.OutFmt = "text"
+	}
+	cliArgs.OnFlake = func() {
+		cliArgs.OutFmt = "flake"
 	}
 	parser := flags.NewParser(&cliArgs, flags.AllowBoolValues)
 	names, err := parser.ParseArgs(args)
@@ -106,11 +111,13 @@ func MainAction(ctx CliArgs) error {
 		return err
 	}
 
-	if ctx.Json {
+	if ctx.OutFmt == "json" {
 		str, err = lib.VersionsJson(versions)
 		if err != nil {
 			return err
 		}
+	} else if ctx.OutFmt == "flake" {
+		str = lib.Flakes(versions)
 	} else {
 		str = lib.VersionsTable(versions)
 	}

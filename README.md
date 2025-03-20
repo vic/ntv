@@ -192,8 +192,9 @@ OPTIONS:
 
    FORMAT
 
-   --json  Output JSON array of versions (default: false)
-   --text  Output text table of versions (default: true)
+   --text     Output text table of versions (default: true)
+   --json     Output JSON array of versions (default: false)
+   --flake    Output as list of nix flake runnables (default: false)
 
    NIX VERSIONS BACKEND
 

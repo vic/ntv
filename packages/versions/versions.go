@@ -106,3 +106,16 @@ func VersionsTable(versions []Version) string {
 	tbl.Print()
 	return buff.String()
 }
+
+func Flakes(versions []Version) string {
+	var buff bytes.Buffer
+	var tbl table.Table
+	tbl = table.New("Flake", "Comment").WithWriter(&buff).WithPrintHeaders(false)
+	for _, version := range versions {
+		flake := fmt.Sprintf("github:NixOS/nixpkgs/%s#%s", version.Revision, version.Attribute)
+		comment := fmt.Sprintf("# %s", version.Version)
+		tbl = tbl.AddRow(flake, comment)
+	}
+	tbl.Print()
+	return buff.String()
+}
