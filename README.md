@@ -46,41 +46,41 @@ Or use directly from github
 #   packages providing `pip`. (eg. python312Packages.pip, python313Packages.pip)
 > nix-versions --exact bin/pip@latest bin/emacsclient@'>27 <29 latest'
 Version  Attribute              Nixpkgs-Revision
-24.0     python313Packages.pip  21808d22b1cda1898b71cf1a1beb524a97add2c4
-24.0     python312Packages.pip  21808d22b1cda1898b71cf1a1beb524a97add2c4
-28.1     emacs-nox              7cf5ccf1cdb2ba5f08f0ac29fc3d04b0b59a07e4
-28.2     emacs-gtk              459104f841356362bfb9ce1c788c1d42846b2454
-28.1     emacs                  7cf5ccf1cdb2ba5f08f0ac29fc3d04b0b59a07e4
+24.0     python313Packages.pip  2d068ae5c6516b2d04562de50a58c682540de9bf
+24.0     python312Packages.pip  2d068ae5c6516b2d04562de50a58c682540de9bf
+28.2     emacs-nox              09ec6a0881e1a36c29d67497693a67a16f4da573
+28.2     emacs-gtk              09ec6a0881e1a36c29d67497693a67a16f4da573
+28.2     emacs                  09ec6a0881e1a36c29d67497693a67a16f4da573
 
 
 # Any package having an executable program that contains `rust` on its name
 > nix-versions --exact=false bin/rust@latest
-Version     Attribute                        Nixpkgs-Revision
-0.23.1      rustywind                        21808d22b1cda1898b71cf1a1beb524a97add2c4
-0.16.0      rustypaste                       21808d22b1cda1898b71cf1a1beb524a97add2c4
-0.1.1       rustycli                         21808d22b1cda1898b71cf1a1beb524a97add2c4
-0.3.7       rusty-psn-gui                    21808d22b1cda1898b71cf1a1beb524a97add2c4
-0.3.7       rusty-psn                        21808d22b1cda1898b71cf1a1beb524a97add2c4
-0.5.0       rusty-man                        21808d22b1cda1898b71cf1a1beb524a97add2c4
-1.0.0       rustus                           21808d22b1cda1898b71cf1a1beb524a97add2c4
-1.7.3       rustup-toolchain-install-master  21808d22b1cda1898b71cf1a1beb524a97add2c4
-2017-10-29  rustup                           28e0126876d688cf5fd15da1c73fbaba256574f0
-2.3.0       rustscan                         21808d22b1cda1898b71cf1a1beb524a97add2c4
+Version  Attribute                        Nixpkgs-Revision
+0.1.1    rustycli                         2d068ae5c6516b2d04562de50a58c682540de9bf
+0.5.0    rusty-man                        2d068ae5c6516b2d04562de50a58c682540de9bf
+0.5.7    rusty-psn-gui                    5d9b5431f967007b3952c057fc92af49a4c5f3b2
+0.5.7    rusty-psn                        5d9b5431f967007b3952c057fc92af49a4c5f3b2
+0.16.0   rustypaste                       2d068ae5c6516b2d04562de50a58c682540de9bf
+0.24.0   rustywind                        8f76cf16b17c51ae0cc8e55488069593f6dab645
+1.1.3    rustus                           8f76cf16b17c51ae0cc8e55488069593f6dab645
+1.7.3    rustup-toolchain-install-master  2d068ae5c6516b2d04562de50a58c682540de9bf
+1.27.1   rustup                           2d068ae5c6516b2d04562de50a58c682540de9bf
+2.4.1    rustscan                         b58e19b11fe72175fd7a9e014a4786a91e99da5f
 
 
 # Packages matching the `cursor editor` query on search.nixos.org
 > nix-versions '~ cursor editor'@latest
 Version   Attribute                     Nixpkgs-Revision
-0.45.14   code-cursor                   0d534853a55b5d02a4ababa1d71921ce8f0aee4c
 0.12.9    editorconfig-core-c           d9b69c3ec2a2e2e971c534065bdd53374bd68b97
+0.45.14   code-cursor                   0d534853a55b5d02a4ababa1d71921ce8f0aee4c
 0.3.2.0   haskellPackages.cursor        2d068ae5c6516b2d04562de50a58c682540de9bf
 3.2.1     editorconfig-checker          8f76cf16b17c51ae0cc8e55488069593f6dab645
 0.3.0.0   haskellPackages.cursor-gen    98bb5b77c8c6666824a4c13d23befa1e07210ef1
-20180228  edit                          29bcead8405cfe4c00085843eb372cc43837bb9d
 1.0.8     editres                       2d068ae5c6516b2d04562de50a58c682540de9bf
+20180228  edit                          29bcead8405cfe4c00085843eb372cc43837bb9d
 0.1.0.1   haskellPackages.cursor-brick  2d068ae5c6516b2d04562de50a58c682540de9bf
-1.1       cursewords                    2d068ae5c6516b2d04562de50a58c682540de9bf
 0.2       curseradio                    0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+1.1       cursewords                    2d068ae5c6516b2d04562de50a58c682540de9bf
 
 
 # Return only the most recent version
