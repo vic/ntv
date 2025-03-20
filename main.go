@@ -8,8 +8,13 @@ import (
 )
 
 func main() {
-	app := app.App()
-	if err := app.Run(os.Args); err != nil {
+	args, err := app.ParseCliArgs(os.Args[1:])
+	if err != nil {
 		log.Fatal(err)
+		os.Exit(2)
+	}
+	if err := app.MainAction(args); err != nil {
+		log.Fatal(err)
+		os.Exit(2)
 	}
 }

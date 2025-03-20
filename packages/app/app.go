@@ -3,17 +3,16 @@ package app
 import (
 	_ "embed"
 	"fmt"
-	"strconv"
+	"os"
 	"strings"
 
-	"github.com/urfave/cli/v2"
-
+	flags "github.com/jessevdk/go-flags"
 	find "github.com/vic/nix-versions/packages/find"
 	lib "github.com/vic/nix-versions/packages/versions"
 )
 
 //go:embed HELP
-var AppHelpTemplate string
+var AppHelp string
 
 //go:embed VERSION
 var AppVersion string
@@ -21,88 +20,69 @@ var AppVersion string
 //go:embed REVISION
 var AppRevision string
 
-func App() cli.App {
-	cli.AppHelpTemplate = AppHelpTemplate
-	return cli.App{
-		Action: mainAction,
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name: "version",
-			},
-			&cli.BoolFlag{
-				Name: "lazamar",
-				Action: func(ctx *cli.Context, b bool) error {
-					ctx.Set("nixhub", strconv.FormatBool(!b))
-					return nil
-				},
-			},
-			&cli.StringFlag{
-				Name:  "channel",
-				Value: "nixpkgs-unstable",
-				Action: func(ctx *cli.Context, b string) error {
-					ctx.Set("nixhub", "false")
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:  "nixhub",
-				Value: true,
-				Action: func(ctx *cli.Context, b bool) error {
-					ctx.Set("lazamar", strconv.FormatBool(!b))
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name: "json",
-				Action: func(ctx *cli.Context, b bool) error {
-					ctx.Set("text", strconv.FormatBool(!b))
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:  "text",
-				Value: true,
-				Action: func(ctx *cli.Context, b bool) error {
-					ctx.Set("json", strconv.FormatBool(!b))
-					return nil
-				},
-			},
-			&cli.BoolFlag{
-				Name:  "sort",
-				Value: true,
-			},
-			&cli.BoolFlag{
-				Name:  "reverse",
-				Value: false,
-			},
-			&cli.BoolFlag{
-				Name:  "exact",
-				Value: false,
-			},
-			&cli.IntFlag{
-				Name:  "limit",
-				Value: 0,
-			},
-			&cli.StringFlag{
-				Name: "constraint",
-			},
-		},
-	}
+type CliArgs struct {
+	OnHelp     func()       `long:"help"`
+	OnVersion  func()       `long:"version"`
+	OnChannel  func(string) `long:"channel"`
+	OnLazamar  func()       `long:"lazamar"`
+	OnNixHub   func()       `long:"nixhub"`
+	OnJson     func()       `long:"json"`
+	OnText     func()       `long:"text"`
+	Lazamar    bool
+	Channel    string
+	Json       bool
+	Sort       bool   `long:"sort"`
+	Reverse    bool   `long:"reverse"`
+	Exact      bool   `long:"exact"`
+	Limit      int    `long:"limit"`
+	Constraint string `long:"constraint"`
+	Names      []string
 }
 
-func mainAction(ctx *cli.Context) error {
-	if ctx.Bool("version") {
+func ParseCliArgs(args []string) (CliArgs, error) {
+	var cliArgs = CliArgs{
+		Channel: "nixpkgs-unstable",
+		Sort:    true,
+	}
+	cliArgs.OnHelp = func() {
+		fmt.Println(AppHelp)
+		os.Exit(0)
+	}
+	cliArgs.OnVersion = func() {
 		fmt.Print(strings.TrimSpace(AppVersion))
 		revision := strings.TrimSpace(AppRevision)
 		if revision != "" {
 			fmt.Printf(" (%s)", revision)
 		}
 		fmt.Println()
-		return nil
+		os.Exit(0)
 	}
+	cliArgs.OnLazamar = func() {
+		cliArgs.Lazamar = true
+	}
+	cliArgs.OnNixHub = func() {
+		cliArgs.Lazamar = false
+	}
+	cliArgs.OnChannel = func(s string) {
+		cliArgs.Channel = s
+		cliArgs.Lazamar = true
+	}
+	cliArgs.OnJson = func() {
+		cliArgs.Json = true
+	}
+	cliArgs.OnText = func() {
+		cliArgs.Json = false
+	}
+	parser := flags.NewParser(&cliArgs, flags.None)
+	names, err := parser.ParseArgs(args)
+	cliArgs.Names = names
+	return cliArgs, err
+}
 
-	if ctx.Args().Len() < 1 {
-		cli.ShowAppHelpAndExit(ctx, 1)
+func MainAction(ctx CliArgs) error {
+	if len(ctx.Names) < 1 {
+		fmt.Println(AppHelp)
+		os.Exit(1)
 		return nil
 	}
 	var (
@@ -112,21 +92,21 @@ func mainAction(ctx *cli.Context) error {
 	)
 
 	opts := find.Opts{
-		Exact:      ctx.Bool("exact"),
-		Constraint: ctx.String("constraint"),
-		Limit:      ctx.Int("limit"),
-		Sort:       ctx.Bool("sort"),
-		Reverse:    ctx.Bool("reverse"),
-		Lazamar:    ctx.Bool("lazamar"),
-		Channel:    ctx.String("channel"),
+		Exact:      ctx.Exact,
+		Constraint: ctx.Constraint,
+		Limit:      ctx.Limit,
+		Sort:       ctx.Sort,
+		Reverse:    ctx.Reverse,
+		Lazamar:    ctx.Lazamar,
+		Channel:    ctx.Channel,
 	}
 
-	versions, err = find.FindVersionsAll(opts, ctx.Args().Slice())
+	versions, err = find.FindVersionsAll(opts, ctx.Names)
 	if err != nil {
 		return err
 	}
 
-	if ctx.Bool("json") {
+	if ctx.Json {
 		str, err = lib.VersionsJson(versions)
 		if err != nil {
 			return err
