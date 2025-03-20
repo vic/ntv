@@ -6,56 +6,76 @@ This is a minimal CLI app written in Go that interfaces with [https://lazamar.co
 
 Install with nix
 
-```
-nix profile install github:vic/nix-versions
-nix-versions --help
+```shell
+> nix profile install github:vic/nix-versions
+> nix-versions --help
 ```
 
 Or use directly from github
 
-```
-nix run github:vic/nix-versions -- --help
+```shell
+> nix run github:vic/nix-versions -- --help
 ```
 
 #### Examples
 
-```
+```shell
 # List known versions of emacs
-nix-versions emacs
+> nix-versions emacs
 
-# Latest versions of packages providing
-#   the `emacsclient` program. (eg. emacs-nox, emacs-gtk, emacs)
-#   the `pip` binary. (eg. python312Packages.pip, python313Packages.pip)
-nix-versions bin/pip@latest bin/emacsclient@latest
+# Latest versions of packages providing some executable programs.
+#   packages providing `emacsclient`. (eg. emacs-nox, emacs-gtk, emacs)
+#   packages providing `pip`. (eg. python312Packages.pip, python313Packages.pip)
+> nix-versions bin/pip@latest bin/emacsclient@'>27 <29 latest'
+Version  Attribute              Nixpkgs-Revision
+24.0     python313Packages.pip  21808d22b1cda1898b71cf1a1beb524a97add2c4
+24.0     python312Packages.pip  21808d22b1cda1898b71cf1a1beb524a97add2c4
+28.1     emacs-nox              7cf5ccf1cdb2ba5f08f0ac29fc3d04b0b59a07e4
+28.2     emacs-gtk              459104f841356362bfb9ce1c788c1d42846b2454
+28.1     emacs                  7cf5ccf1cdb2ba5f08f0ac29fc3d04b0b59a07e4
 
-# Any package having a binary that contains `rust` on its name
-nix-versions --exact=false bin/rust@latest
+
+# Any package having an executable program that contains `rust` on its name
+> nix-versions --exact=false bin/rust@latest
+Version     Attribute                        Nixpkgs-Revision
+0.23.1      rustywind                        21808d22b1cda1898b71cf1a1beb524a97add2c4
+0.16.0      rustypaste                       21808d22b1cda1898b71cf1a1beb524a97add2c4
+0.1.1       rustycli                         21808d22b1cda1898b71cf1a1beb524a97add2c4
+0.3.7       rusty-psn-gui                    21808d22b1cda1898b71cf1a1beb524a97add2c4
+0.3.7       rusty-psn                        21808d22b1cda1898b71cf1a1beb524a97add2c4
+0.5.0       rusty-man                        21808d22b1cda1898b71cf1a1beb524a97add2c4
+1.0.0       rustus                           21808d22b1cda1898b71cf1a1beb524a97add2c4
+1.7.3       rustup-toolchain-install-master  21808d22b1cda1898b71cf1a1beb524a97add2c4
+2017-10-29  rustup                           28e0126876d688cf5fd15da1c73fbaba256574f0
+2.3.0       rustscan                         21808d22b1cda1898b71cf1a1beb524a97add2c4
 
 # Return only the most recent version
-nix-versions --limit 1 emacs
+> nix-versions --limit 1 emacs
 
 # Only versions between 25 and 27. Output JSON
-nix-versions --constraint '>= 25 <= 27' --json emacs
+# same as 'emacs@>= 25 <= 27'
+> nix-versions --constraint '>= 25 <= 27' --json emacs
 
 # Latest of 29 series.
-nix-versions --constraint '~29' --limit 1 emacs
+# same as 'emacs@latest~29'
+> nix-versions --constraint '~29' --limit 1 emacs
 
 # Also include emacs-nox and others
-nix-versions --exact=false emacs
+> nix-versions --exact=false emacs
 
 # Show versions of pip from nixhub.io in the order that nixhub returns them
-nix-versions --nixhub --sort=false python312Packages.pip
+> nix-versions --nixhub --sort=false python312Packages.pip
 
 # Use release channel `nixpkgs/nixos-24.05` (using lazamar search)
-nix-versions --channel nixos-24.05 python312Packages.pip
+> nix-versions --channel nixos-24.05 python312Packages.pip
 
 # NixHub.io has rate-limits but will likely have indexed more recent versions.
 # https://www.jetify.com/docs/nixhub/#rate-limits
-nix-versions --nixhub bun@latest
+> nix-versions --nixhub bun@latest
 1.2.5    bun        573c650e8a14b2faa0041645ab18aed7e60f0c9a
 
 # https://lazamar.co.uk/nix-versions/ has no rate-limit, we scrap the webpage.
-nix-versions --lazamar bun@latest
+> nix-versions --lazamar bun@latest
 1.1.43   bun        21808d22b1cda1898b71cf1a1beb524a97add2c4
 ```
 
@@ -66,6 +86,15 @@ nix-versions - show available nix packages versions
 
 USAGE:
    nix-versions [options] PKG_ATTRIBUTE_NAME...
+
+PKG_ATTRIBUTE_NAME:
+   A package attribute name like `emacs` or `python312Packages.pip`.
+   Use https://search.nixos.org to find the attribute name for a package.
+
+   It can also be a program name like `bin/pip` or `bin/emacsclient`.
+   In this case, the search will be for packages that provide the program.
+
+   Optionally you can add a version constraint to the package name like `bin/emacs@^25.x` or `emacs@>= 25 <= 27`.
 
 OPTIONS:
    --help, -h  show help and exit

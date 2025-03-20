@@ -3,6 +3,15 @@ nix-versions - show available nix packages versions
 USAGE:
    nix-versions [options] PKG_ATTRIBUTE_NAME...
 
+PKG_ATTRIBUTE_NAME:
+   A package attribute name like `emacs` or `python312Packages.pip`.
+   Use https://search.nixos.org to find the attribute name for a package.
+
+   It can also be a program name like `bin/pip` or `bin/emacsclient`.
+   In this case, the search will be for packages that provide the program.
+
+   Optionally you can add a version constraint to the package name like `bin/emacs@^25.x` or `emacs@>= 25 <= 27`.
+
 OPTIONS:
    --help, -h  show help and exit
    --version   show version and exit
