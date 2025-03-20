@@ -34,7 +34,7 @@ Or use directly from github
 # Latest versions of packages providing some executable programs.
 #   packages providing `emacsclient`. (eg. emacs-nox, emacs-gtk, emacs)
 #   packages providing `pip`. (eg. python312Packages.pip, python313Packages.pip)
-> nix-versions bin/pip@latest bin/emacsclient@'>27 <29 latest'
+> nix-versions --exact bin/pip@latest bin/emacsclient@'>27 <29 latest'
 Version  Attribute              Nixpkgs-Revision
 24.0     python313Packages.pip  21808d22b1cda1898b71cf1a1beb524a97add2c4
 24.0     python312Packages.pip  21808d22b1cda1898b71cf1a1beb524a97add2c4
@@ -68,8 +68,8 @@ Version     Attribute                        Nixpkgs-Revision
 # same as 'emacs@latest~29'
 > nix-versions --constraint '~29' --limit 1 emacs
 
-# Also include emacs-nox and others
-> nix-versions --exact=false emacs
+# Do not include emacs-nox and emacs-gtk
+> nix-versions --exact emacs
 
 # Show versions of pip from nixhub.io in the order that nixhub returns them
 > nix-versions --nixhub --sort=false python312Packages.pip
@@ -126,7 +126,7 @@ OPTIONS:
                           'emacs@latest<25'    - Only show the latest emacs before the `25` series
                           'emacs@latest~29'    - Only show the most recent emacs of the `29` series
 
-   --exact              Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME (default: true)
+   --exact              Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME (default: false)
    --limit n            Limit to a number of results. 1 means only last and `-1` only first. (default: 0)
    --reverse            New versions first (default: false)
    --sort               Sorted by version instead of using backend ordering (default: true)

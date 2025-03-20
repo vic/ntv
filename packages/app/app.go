@@ -77,7 +77,7 @@ func App() cli.App {
 			},
 			&cli.BoolFlag{
 				Name:  "exact",
-				Value: true,
+				Value: false,
 			},
 			&cli.IntFlag{
 				Name:  "limit",
