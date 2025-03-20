@@ -113,8 +113,11 @@ func Installables(versions []Version) string {
 	stat, _ := os.Stdout.Stat()
 	piped := stat.Mode()&os.ModeCharDevice == 0
 	if piped {
-		for _, version := range versions {
-			buff.WriteString(fmt.Sprintf("github:NixOS/nixpkgs/%s#%s\n", version.Revision, version.Attribute))
+		for n, version := range versions {
+			buff.WriteString(fmt.Sprintf("github:NixOS/nixpkgs/%s#%s", version.Revision, version.Attribute))
+			if n < len(versions)-1 {
+				buff.WriteString("\n")
+			}
 		}
 		return buff.String()
 	}

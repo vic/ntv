@@ -25,8 +25,14 @@ type Opts struct {
 }
 
 func FindPackagesWithQuery(ctx Opts, search string) ([]string, error) {
+	var limit int
+	if ctx.Limit < 0 {
+		limit = max(ctx.Limit*-1, 10)
+	} else {
+		limit = max(ctx.Limit, 10)
+	}
 	query := nixsearch.Query{
-		MaxResults: 10,
+		MaxResults: limit,
 		Channel:    "unstable",
 		Search:     &nixsearch.MatchSearch{Search: search},
 	}
@@ -49,8 +55,14 @@ func FindPackagesWithQuery(ctx Opts, search string) ([]string, error) {
 }
 
 func FindPackagesWithProgram(ctx Opts, program string) ([]string, error) {
+	var limit int
+	if ctx.Limit < 0 {
+		limit = max(ctx.Limit*-1, 10)
+	} else {
+		limit = max(ctx.Limit, 10)
+	}
 	query := nixsearch.Query{
-		MaxResults: 10,
+		MaxResults: limit,
 		Channel:    "unstable",
 		Program:    &nixsearch.MatchProgram{Program: program},
 	}
