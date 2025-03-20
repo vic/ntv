@@ -73,7 +73,7 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 	cliArgs.OnText = func() {
 		cliArgs.Json = false
 	}
-	parser := flags.NewParser(&cliArgs, flags.None)
+	parser := flags.NewParser(&cliArgs, flags.AllowBoolValues)
 	names, err := parser.ParseArgs(args)
 	cliArgs.Names = names
 	return cliArgs, err
