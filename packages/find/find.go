@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/peterldowns/nix-search-cli/pkg/nixsearch"
+	nixsearch "github.com/peterldowns/nix-search-cli/pkg/nixsearch"
 	"github.com/vic/nix-versions/packages/lazamar"
 	"github.com/vic/nix-versions/packages/nixhub"
 	lib "github.com/vic/nix-versions/packages/versions"
@@ -20,6 +20,30 @@ type Opts struct {
 	Reverse    bool
 	Lazamar    bool
 	Channel    string
+}
+
+func FindPackagesWithQuery(ctx Opts, search string) ([]string, error) {
+	query := nixsearch.Query{
+		MaxResults: 10,
+		Channel:    "unstable",
+		Search:     &nixsearch.MatchSearch{Search: search},
+	}
+	client, err := nixsearch.NewElasticSearchClient()
+	if err != nil {
+		return nil, err
+	}
+	packages, err := client.Search(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, pkg := range packages {
+		names = append(names, pkg.AttrName)
+	}
+	if len(names) < 1 {
+		return nil, fmt.Errorf("No packages found matching `%s`.", search)
+	}
+	return names, nil
 }
 
 func FindPackagesWithProgram(ctx Opts, program string) ([]string, error) {
@@ -67,8 +91,7 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 		constraint = name[strings.Index(name, "@")+1:]
 		pkgAttr = name[:strings.Index(name, "@")]
 	}
-	if strings.HasPrefix(pkgAttr, "bin/") {
-		attrs, err := FindPackagesWithProgram(ctx, pkgAttr[4:])
+	searchAgain := func(attrs []string, err error) ([]lib.Version, error) {
 		if err != nil {
 			return nil, err
 		}
@@ -81,6 +104,14 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 			pkgs = attrs
 		}
 		return FindVersionsAll(ctx, pkgs)
+	}
+	if strings.HasPrefix(pkgAttr, "~") {
+		attrs, err := FindPackagesWithQuery(ctx, pkgAttr[1:])
+		return searchAgain(attrs, err)
+	}
+	if strings.HasPrefix(pkgAttr, "bin:") {
+		attrs, err := FindPackagesWithProgram(ctx, pkgAttr[4:])
+		return searchAgain(attrs, err)
 	}
 	if strings.Contains(constraint, "latest") {
 		constraint = strings.Replace(constraint, "latest", "", 1)

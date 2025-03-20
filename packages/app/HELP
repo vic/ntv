@@ -7,10 +7,16 @@ PKG_ATTRIBUTE_NAME:
    A package attribute name like `emacs` or `python312Packages.pip`.
    Use https://search.nixos.org to find the attribute name for a package.
 
-   It can also be a program name like `bin/pip` or `bin/emacsclient`.
-   In this case, the search will be for packages that provide the program.
+   If you don't know the attribute name, you can search for packages
+   by query (prefixed by `~`) or by program name (prefixed by `bin/`).
 
-   Optionally you can add a version constraint to the package name like `bin/emacs@^25.x` or `emacs@>= 25 <= 27`.
+   For example `~ git porcelain` will search the index at search.nixos.org for
+   packages that match the query.
+
+   And using `bin/pip` will search for packages that provide that program.
+
+   Optionally you can add a version constraint to the package name like
+   `bin/emacs@^25.x` or `emacs@>= 25 <= 27` or `~ git porcelain @latest`.
 
 OPTIONS:
    --help, -h  show help and exit

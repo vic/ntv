@@ -35,7 +35,7 @@ func Versions(name string) ([]lib.Version, error) {
 		ToJSON(&body).
 		Fetch(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Error fetching versions from nixhub.io for `%s`: %v\nPerhaps the package is not available on nixhub.io under the `%s` name.\nTry using https://www.nixhub.io/search?q=%s to find the proper attribute name.", name, err, name, name)
+		return nil, fmt.Errorf("Error fetching versions from nixhub.io for `%s`: %v\nPerhaps the package is not available on nixhub.io under the `%s` name.\nTry using `~%s` as argument or use https://www.nixhub.io/search?q=%s to find the proper attribute name.", name, err, name, name, name)
 	}
 	for _, release := range body.Releases {
 		platform := release.Platforms[len(release.Platforms)-1]
