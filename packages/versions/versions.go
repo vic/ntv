@@ -4,17 +4,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/rodaine/table"
 )
 
+// TODO: Rename to Installable
+// TODO: Produce as few different revisions as possible.
+//
+//	Each nixpkgs checkout is about 40M
+//	--optimize=true
 type Version struct {
 	Attribute string `json:"attr_path"`
 	Version   string `json:"version"`
-	Revision  string `json:"nixpkgs_rev"`
+	Flake     string `json:"flake"`
+	Revision  string `json:"revision"`
 }
 
 type ByVersion []Version
@@ -100,9 +105,9 @@ func VersionsJson(versions []Version) (string, error) {
 func VersionsTable(versions []Version) string {
 	var buff bytes.Buffer
 	var tbl table.Table
-	tbl = table.New("Version", "Attribute", "Nixpkgs-Revision").WithWriter(&buff).WithPrintHeaders(len(versions) > 1)
+	tbl = table.New("Version", "Attribute", "Flake", "Revision").WithWriter(&buff).WithPrintHeaders(len(versions) > 1)
 	for _, version := range versions {
-		tbl = tbl.AddRow(version.Version, version.Attribute, version.Revision)
+		tbl = tbl.AddRow(version.Version, version.Attribute, version.Flake, version.Revision)
 	}
 	tbl.Print()
 	return buff.String()
@@ -110,22 +115,25 @@ func VersionsTable(versions []Version) string {
 
 func Installables(versions []Version) string {
 	var buff bytes.Buffer
-	stat, _ := os.Stdout.Stat()
-	piped := stat.Mode()&os.ModeCharDevice == 0
-	if piped {
-		for n, version := range versions {
-			buff.WriteString(fmt.Sprintf("github:NixOS/nixpkgs/%s#%s", version.Revision, version.Attribute))
-			if n < len(versions)-1 {
-				buff.WriteString("\n")
-			}
-		}
-		return buff.String()
-	}
+	// stat, _ := os.Stdout.Stat()
+	// piped := stat.Mode()&os.ModeCharDevice == 0
+	// if piped {
+	// 	for n, version := range versions {
+	// 		buff.WriteString(fmt.Sprintf("%s/%s#%s", version.Flake, version.Revision, version.Attribute))
+	// 		if n < len(versions)-1 {
+	// 			buff.WriteString("\n")
+	// 		}
+	// 	}
+	// 	return buff.String()
+	// }
 	var tbl table.Table
 	tbl = table.New("Installable", "Comment").WithWriter(&buff).WithPrintHeaders(false)
 	for _, version := range versions {
-		installable := fmt.Sprintf("github:NixOS/nixpkgs/%s#%s", version.Revision, version.Attribute)
-		comment := fmt.Sprintf("# %s", version.Version)
+		installable := fmt.Sprintf("%s/%s#%s", version.Flake, version.Revision, version.Attribute)
+		var comment string
+		if version.Version != "" {
+			comment = fmt.Sprintf("# version: %s", version.Version)
+		}
 		tbl = tbl.AddRow(installable, comment)
 	}
 	tbl.Print()

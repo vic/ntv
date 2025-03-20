@@ -43,6 +43,7 @@ func Versions(name string, channel string) ([]lib.Version, error) {
 			Attribute: query.Get("keyName"),
 			Version:   query.Get("version"),
 			Revision:  query.Get("revision"),
+			Flake:     "nixpkgs",
 		}
 		result = append(result, version)
 	}

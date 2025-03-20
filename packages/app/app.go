@@ -32,6 +32,7 @@ type CliArgs struct {
 	Lazamar       bool
 	Channel       string
 	OutFmt        string
+	One           bool   `long:"assert-one"`
 	Sort          bool   `long:"sort"`
 	Reverse       bool   `long:"reverse"`
 	Exact         bool   `long:"exact"`
@@ -97,6 +98,7 @@ func MainAction(ctx CliArgs) error {
 	)
 
 	opts := find.Opts{
+		One:        ctx.One,
 		Exact:      ctx.Exact,
 		Constraint: ctx.Constraint,
 		Limit:      ctx.Limit,
@@ -106,7 +108,7 @@ func MainAction(ctx CliArgs) error {
 		Channel:    ctx.Channel,
 	}
 
-	versions, err = find.FindVersionsAll(opts, ctx.Names)
+	versions, err = find.FindReadingVersionsAll(opts, ctx.Names)
 	if err != nil {
 		return err
 	}
@@ -123,5 +125,18 @@ func MainAction(ctx CliArgs) error {
 	}
 
 	fmt.Println(str)
+	if ctx.One {
+		var seen = make(map[string]int)
+		var anyFailed = false
+		for _, v := range versions {
+			seen[v.Attribute]++
+			if seen[v.Attribute] > 1 {
+				anyFailed = true
+			}
+		}
+		if anyFailed {
+			return fmt.Errorf("Assertion failure. Expected at most one version per package. But got %v", seen)
+		}
+	}
 	return nil
 }

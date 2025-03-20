@@ -17,3 +17,5 @@ result
 vendor
 nix-versions
 REVISION
+
+.nix-tools

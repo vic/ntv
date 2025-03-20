@@ -43,6 +43,7 @@ func Versions(name string) ([]lib.Version, error) {
 			Attribute: platform.AttributePath,
 			Version:   release.Version,
 			Revision:  platform.CommitHash,
+			Flake:     "nixpkgs",
 		}
 		result = append(result, version)
 	}
