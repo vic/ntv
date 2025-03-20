@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
@@ -107,14 +108,22 @@ func VersionsTable(versions []Version) string {
 	return buff.String()
 }
 
-func Flakes(versions []Version) string {
+func Installables(versions []Version) string {
 	var buff bytes.Buffer
+	stat, _ := os.Stdout.Stat()
+	piped := stat.Mode()&os.ModeCharDevice == 0
+	if piped {
+		for _, version := range versions {
+			buff.WriteString(fmt.Sprintf("github:NixOS/nixpkgs/%s#%s\n", version.Revision, version.Attribute))
+		}
+		return buff.String()
+	}
 	var tbl table.Table
-	tbl = table.New("Flake", "Comment").WithWriter(&buff).WithPrintHeaders(false)
+	tbl = table.New("Installable", "Comment").WithWriter(&buff).WithPrintHeaders(false)
 	for _, version := range versions {
-		flake := fmt.Sprintf("github:NixOS/nixpkgs/%s#%s", version.Revision, version.Attribute)
+		installable := fmt.Sprintf("github:NixOS/nixpkgs/%s#%s", version.Revision, version.Attribute)
 		comment := fmt.Sprintf("# %s", version.Version)
-		tbl = tbl.AddRow(flake, comment)
+		tbl = tbl.AddRow(installable, comment)
 	}
 	tbl.Print()
 	return buff.String()

@@ -21,23 +21,23 @@ var AppVersion string
 var AppRevision string
 
 type CliArgs struct {
-	OnHelp     func()       `long:"help" short:"h"`
-	OnVersion  func()       `long:"version"`
-	OnChannel  func(string) `long:"channel"`
-	OnLazamar  func()       `long:"lazamar"`
-	OnNixHub   func()       `long:"nixhub"`
-	OnJson     func()       `long:"json"`
-	OnText     func()       `long:"text"`
-	OnFlake    func()       `long:"flake"`
-	Lazamar    bool
-	Channel    string
-	OutFmt     string
-	Sort       bool   `long:"sort"`
-	Reverse    bool   `long:"reverse"`
-	Exact      bool   `long:"exact"`
-	Limit      int    `long:"limit"`
-	Constraint string `long:"constraint"`
-	Names      []string
+	OnHelp        func()       `long:"help" short:"h"`
+	OnVersion     func()       `long:"version"`
+	OnChannel     func(string) `long:"channel"`
+	OnLazamar     func()       `long:"lazamar"`
+	OnNixHub      func()       `long:"nixhub"`
+	OnJson        func()       `long:"json"`
+	OnText        func()       `long:"text"`
+	OnInstallable func()       `long:"installable"`
+	Lazamar       bool
+	Channel       string
+	OutFmt        string
+	Sort          bool   `long:"sort"`
+	Reverse       bool   `long:"reverse"`
+	Exact         bool   `long:"exact"`
+	Limit         int    `long:"limit"`
+	Constraint    string `long:"constraint"`
+	Names         []string
 }
 
 func ParseCliArgs(args []string) (CliArgs, error) {
@@ -75,8 +75,8 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 	cliArgs.OnText = func() {
 		cliArgs.OutFmt = "text"
 	}
-	cliArgs.OnFlake = func() {
-		cliArgs.OutFmt = "flake"
+	cliArgs.OnInstallable = func() {
+		cliArgs.OutFmt = "installable"
 	}
 	parser := flags.NewParser(&cliArgs, flags.AllowBoolValues)
 	names, err := parser.ParseArgs(args)
@@ -116,8 +116,8 @@ func MainAction(ctx CliArgs) error {
 		if err != nil {
 			return err
 		}
-	} else if ctx.OutFmt == "flake" {
-		str = lib.Flakes(versions)
+	} else if ctx.OutFmt == "installable" {
+		str = lib.Installables(versions)
 	} else {
 		str = lib.VersionsTable(versions)
 	}

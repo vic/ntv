@@ -192,15 +192,15 @@ OPTIONS:
 
    FORMAT
 
-   --text     Output text table of versions (default: true)
-   --json     Output JSON array of versions (default: false)
-   --flake    Output as list of nix flake runnables (default: false)
+   --text               Output text table of versions (default: true)
+   --json               Output JSON array of versions (default: false)
+   --installable        Output as list of nix flake installables (default: false)
 
    NIX VERSIONS BACKEND
 
-   --channel value  Nixpkgs channel for lazamar backend. Enables lazamar when set. (default: "nixpkgs-unstable")
-   --lazamar        Use https://lazamar.co.uk/nix-versions as backend (default: false)
-   --nixhub         Use https://www.nixhub.io/ as backend (default: true)
+   --channel value      Nixpkgs channel for lazamar backend. Enables lazamar when set. (default: "nixpkgs-unstable")
+   --lazamar            Use https://lazamar.co.uk/nix-versions as backend (default: false)
+   --nixhub             Use https://www.nixhub.io/ as backend (default: true)
 
 Made with <3 by vic [https://x.com/oeiuwq].
 See https://github.com/vic/nix-versions for examples and reporting issues.
