@@ -171,5 +171,16 @@ func FindVersionsAll(ctx Opts, names []string) ([]lib.Version, error) {
 		}
 		versions = append(versions, vers...)
 	}
+
+	if ctx.Sort {
+		lib.SortByVersion(versions)
+	}
+	if ctx.Reverse {
+		slices.Reverse(versions)
+	}
+	if ctx.Limit != 0 {
+		versions = lib.Limit(versions, ctx.Limit)
+	}
+
 	return versions, nil
 }
