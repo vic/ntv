@@ -109,7 +109,7 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 		attrs, err := FindPackagesWithQuery(ctx, pkgAttr[1:])
 		return searchAgain(attrs, err)
 	}
-	if strings.HasPrefix(pkgAttr, "bin:") {
+	if strings.HasPrefix(pkgAttr, "bin/") {
 		attrs, err := FindPackagesWithProgram(ctx, pkgAttr[4:])
 		return searchAgain(attrs, err)
 	}
