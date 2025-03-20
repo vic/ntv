@@ -8,14 +8,15 @@ It uses the following backends for searching nixpkgs revisions:
 - [nixhub](https://nixhub.io)
 
 It can search for packages by attribute-path, or by fuzzy searching [search.nixos.org](https://search.nixos.org) by name/description or by the executable programs they provide.
-This is possible thanks to [nix-search-cli](https://github.com/peterldowns/nix-search-cli)'s ElasticSearch client. 
+This is possible thanks to [nix-search-cli](https://github.com/peterldowns/nix-search-cli)'s ElasticSearch client.
 
 <details>
 <summary>   
-   
+
 ### Installation
+
 </summary>
-   
+
 Install with nix
 
 ```shell
@@ -28,12 +29,14 @@ Or use directly from github
 ```shell
 > nix run github:vic/nix-versions -- --help
 ```
+
 </details>
 
 <details>
 <summary>
 
 ##### Usage Examples
+
 </summary>
 
 ```shell
@@ -133,8 +136,9 @@ Version  Attribute         Nixpkgs-Revision
 
 <details>
 <summary>
-   
+
 ###### `nix-versions --help`
+
 </summary>
 
 ```
@@ -193,15 +197,18 @@ OPTIONS:
 Made with <3 by vic [https://x.com/oeiuwq].
 See https://github.com/vic/nix-versions for examples and reporting issues.
 ```
+
 </details>
 
 <details>
 <summary>
-   
+
 ###### Motivation
+
 </summary>
 
 - `nixpkgs` is an outstanding repository of programs, some say it's the largest most up-to-date repository. However since nixpkgs is only a repo of receipes, it will likely only contain the most recent version of a package. That's why sites like lazamar's and nixhub help searching for historic revisions of nixpkgs that used to contain a particular program version.
 
 - I'm trying to use this CLI app to help other utilities find previous versions of nixpkgs programs.
+
 </details>
