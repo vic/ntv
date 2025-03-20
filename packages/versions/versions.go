@@ -54,7 +54,7 @@ func Limit(versions []Version, n int) []Version {
 func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
 	cond, err := semver.NewConstraint(constraint)
 	if err != nil {
-		return nil, fmt.Errorf("Could not create constraint from `%s`: %v", constraint, err)
+		return nil, fmt.Errorf("Could not create constraint from `%s`: %v\nSee https://github.com/Masterminds/semver?tab=readme-ov-file#basic-comparisons", constraint, err)
 	}
 	var res []Version
 	for _, ver := range versions {
