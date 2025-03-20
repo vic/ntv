@@ -1,6 +1,14 @@
-# nix-versions - Search nix packages versions with lazamar/nix-versions or nixhub
+# nix-versions - Search nix packages versions.
 
-This is a minimal CLI app written in Go that interfaces with [https://lazamar.co.uk/nix-versions/](https://lazamar.co.uk/nix-versions/) and [nixhub](https://nixhub.io).
+This CLI utility helps you find the versions of nix packages that were available in a particular nixpkgs revision.
+
+It uses the following backends for searching nixpkgs revisions:
+
+- [lazamar/nix-versions](https://lazamar.co.uk/nix-versions/)
+- [nixhub](https://nixhub.io)
+
+It can search for packages by name/description or by the executable programs they provide.
+This is possible thanks to [nix-search-cli](https://github.com/peterldowns/nix-search-cli)'s ElasticSearch client for [search.nixos.org](https://search.nixos.org)
 
 ## Installation
 
