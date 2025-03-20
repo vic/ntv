@@ -3,6 +3,7 @@ package versions
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
@@ -53,13 +54,13 @@ func Limit(versions []Version, n int) []Version {
 func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
 	cond, err := semver.NewConstraint(constraint)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Could not create constraint from `%s`: %v", constraint, err)
 	}
 	var res []Version
 	for _, ver := range versions {
 		v, err := semver.NewVersion(ver.Version)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		if cond.Check(v) {
 			res = append(res, ver)

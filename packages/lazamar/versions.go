@@ -36,7 +36,7 @@ func Versions(name string, channel string) ([]lib.Version, error) {
 	for _, link := range list {
 		href, err := url.Parse(htmlquery.InnerText(link))
 		if err != nil {
-			return nil, err
+			continue
 		}
 		query := href.Query()
 		version := lib.Version{
