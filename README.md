@@ -7,11 +7,15 @@ It uses the following backends for searching nixpkgs revisions:
 - [lazamar/nix-versions](https://lazamar.co.uk/nix-versions/)
 - [nixhub](https://nixhub.io)
 
-It can search for packages by name/description or by the executable programs they provide.
-This is possible thanks to [nix-search-cli](https://github.com/peterldowns/nix-search-cli)'s ElasticSearch client for [search.nixos.org](https://search.nixos.org)
+It can search for packages by attribute-path, or by fuzzy searching [search.nixos.org](https://search.nixos.org) by name/description or by the executable programs they provide.
+This is possible thanks to [nix-search-cli](https://github.com/peterldowns/nix-search-cli)'s ElasticSearch client. 
 
-## Installation
-
+<details>
+<summary>   
+   
+### Installation
+</summary>
+   
 Install with nix
 
 ```shell
@@ -24,8 +28,13 @@ Or use directly from github
 ```shell
 > nix run github:vic/nix-versions -- --help
 ```
+</details>
 
-#### Examples
+<details>
+<summary>
+
+##### Usage Examples
+</summary>
 
 ```shell
 # Show known versions of emacs on Lazamar-index (including emacs-nox, emacs-gtk, etc)
@@ -68,19 +77,19 @@ Version  Attribute                        Nixpkgs-Revision
 2.4.1    rustscan                         b58e19b11fe72175fd7a9e014a4786a91e99da5f
 
 
-# Packages matching the `cursor editor` query on search.nixos.org
-> nix-versions '~ cursor editor'@latest
-Version   Attribute                     Nixpkgs-Revision
-0.12.9    editorconfig-core-c           d9b69c3ec2a2e2e971c534065bdd53374bd68b97
-0.45.14   code-cursor                   0d534853a55b5d02a4ababa1d71921ce8f0aee4c
-0.3.2.0   haskellPackages.cursor        2d068ae5c6516b2d04562de50a58c682540de9bf
-3.2.1     editorconfig-checker          8f76cf16b17c51ae0cc8e55488069593f6dab645
-0.3.0.0   haskellPackages.cursor-gen    98bb5b77c8c6666824a4c13d23befa1e07210ef1
-1.0.8     editres                       2d068ae5c6516b2d04562de50a58c682540de9bf
-20180228  edit                          29bcead8405cfe4c00085843eb372cc43837bb9d
-0.1.0.1   haskellPackages.cursor-brick  2d068ae5c6516b2d04562de50a58c682540de9bf
-0.2       curseradio                    0d534853a55b5d02a4ababa1d71921ce8f0aee4c
-1.1       cursewords                    2d068ae5c6516b2d04562de50a58c682540de9bf
+# Packages matching the `netscape` query on search.nixos.org
+> nix-versions '~netscape'@latest
+Version  Attribute         Nixpkgs-Revision
+0.1.3    netsurf.libnslog  0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+0.1.6    netsurf.libnspsl  2d068ae5c6516b2d04562de50a58c682540de9bf
+0.2.2    netsurf.libnsfb   2d068ae5c6516b2d04562de50a58c682540de9bf
+0.4      netselect         6c5c5f5100281f8f4ff23f13edd17d645178c87c
+0.4.2    netsurf.libdom    0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+0.6.2    netscanner        0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+0.6.9    netsniff-ng       e05f8bda630a0836d777d84de14b3c16eb758514
+0.9.2    netsurf.libcss    0d534853a55b5d02a4ababa1d71921ce8f0aee4c
+1.0.0    netsurf.libnsgif  de0fe301211c267807afd11b12613f5511ff7433
+3.11     netsurf.browser   2d068ae5c6516b2d04562de50a58c682540de9bf
 
 
 # Return only the most recent version
@@ -120,7 +129,13 @@ Version   Attribute                     Nixpkgs-Revision
 1.1.43   bun        21808d22b1cda1898b71cf1a1beb524a97add2c4
 ```
 
-#### nix-versions --help
+</details>
+
+<details>
+<summary>
+   
+###### `nix-versions --help`
+</summary>
 
 ```
 nix-versions - show available nix packages versions
@@ -178,21 +193,15 @@ OPTIONS:
 Made with <3 by vic [https://x.com/oeiuwq].
 See https://github.com/vic/nix-versions for examples and reporting issues.
 ```
+</details>
 
-- Use the `nix search` builtin command.
-
-```shell
-nix search emacs
-```
-
-- Official search https://search.nixos.org/packages
-
-Actually `nix-search-cli` is an CLI interface to this.
-
-Once you know the attribute path for the package you need, you can use `nix-versions` to search which nixpkgs revision corresponded to each particular package version.
-
-## Motivation
+<details>
+<summary>
+   
+###### Motivation
+</summary>
 
 - `nixpkgs` is an outstanding repository of programs, some say it's the largest most up-to-date repository. However since nixpkgs is only a repo of receipes, it will likely only contain the most recent version of a package. That's why sites like lazamar's and nixhub help searching for historic revisions of nixpkgs that used to contain a particular program version.
 
 - I'm trying to use this CLI app to help other utilities find previous versions of nixpkgs programs.
+</details>
