@@ -124,7 +124,6 @@ func MainAction(ctx CliArgs) error {
 		str = lib.VersionsTable(versions)
 	}
 
-	fmt.Println(str)
 	if ctx.One {
 		var seen = make(map[string]int)
 		var anyFailed = false
@@ -135,8 +134,11 @@ func MainAction(ctx CliArgs) error {
 			}
 		}
 		if anyFailed {
+			fmt.Fprint(os.Stderr, str, "\n")
 			return fmt.Errorf("Assertion failure. Expected at most one version per package. But got %v", seen)
 		}
 	}
+
+	fmt.Println(str)
 	return nil
 }
