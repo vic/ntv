@@ -3,6 +3,7 @@ package find
 import (
 	"context"
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 
@@ -77,6 +78,11 @@ func FindPackagesWithProgram(ctx Opts, program string) ([]string, error) {
 	return names, nil
 }
 
+func isFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
+}
+
 func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 	var (
 		err              error
@@ -89,8 +95,15 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 		constraintInName = strings.Contains(name, "@")
 	)
 	if constraintInName {
-		constraint = name[strings.Index(name, "@")+1:]
 		pkgAttr = name[:strings.Index(name, "@")]
+		constraint = name[strings.Index(name, "@")+1:]
+		if isFile(constraint) {
+			bytes, err := os.ReadFile(constraint)
+			if err != nil {
+				return nil, err
+			}
+			constraint = strings.TrimSpace(string(bytes))
+		}
 	}
 	searchAgain := func(attrs []string, err error) ([]lib.Version, error) {
 		if err != nil {

@@ -34,7 +34,14 @@ OPTIONS:
                           'emacs@latest<25'    - Only show the latest emacs before the `25` series
                           'emacs@latest~29'    - Only show the most recent emacs of the `29` series
 
+                        If the value after `@` is a readable file, it will be read as a version constraint.
+                        This is useful for reading the version from a file like `.node-version`, etc.
+                          'bin/node@.node-version'
+
    --exact              Only include results whose attribute is exactly PKG_ATTRIBUTE_NAME (default: false)
+                        When searching for executable programs like `bin/foo`, `--exact=false` returns
+                        packages having any program that contains `foo` as part of its name.
+
    --limit n            Limit to a number of results. 1 means only last and `-1` only first. (default: 0)
    --reverse            New versions first (default: false)
    --sort               Sorted by version instead of using backend ordering (default: true)
