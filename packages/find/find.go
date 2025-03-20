@@ -13,13 +13,14 @@ import (
 )
 
 type Opts struct {
-	Exact      bool
-	Constraint string
-	Limit      int
-	Sort       bool
-	Reverse    bool
-	Lazamar    bool
-	Channel    string
+	Exact          bool
+	Constraint     string
+	Limit          int
+	Sort           bool
+	Reverse        bool
+	Lazamar        bool
+	Channel        string
+	ignoreFetchErr bool
 }
 
 func FindPackagesWithQuery(ctx Opts, search string) ([]string, error) {
@@ -103,7 +104,17 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 		} else {
 			pkgs = attrs
 		}
-		return FindVersionsAll(ctx, pkgs)
+		opts := Opts{
+			Exact:          ctx.Exact,
+			Constraint:     ctx.Constraint,
+			Limit:          ctx.Limit,
+			Sort:           ctx.Sort,
+			Reverse:        ctx.Reverse,
+			Lazamar:        ctx.Lazamar,
+			Channel:        ctx.Channel,
+			ignoreFetchErr: true,
+		}
+		return FindVersionsAll(opts, pkgs)
 	}
 	if strings.HasPrefix(pkgAttr, "~") {
 		attrs, err := FindPackagesWithQuery(ctx, pkgAttr[1:])
@@ -125,6 +136,9 @@ func FindVersions(ctx Opts, name string) ([]lib.Version, error) {
 		versions, err = nixhub.Versions(pkgAttr)
 	}
 	if err != nil {
+		if ctx.ignoreFetchErr {
+			return versions, nil
+		}
 		return nil, err
 	}
 	if ctx.Exact {
