@@ -21,7 +21,7 @@ var AppVersion string
 var AppRevision string
 
 type CliArgs struct {
-	OnHelp     func()       `long:"help"`
+	OnHelp     func()       `long:"help" short:"h"`
 	OnVersion  func()       `long:"version"`
 	OnChannel  func(string) `long:"channel"`
 	OnLazamar  func()       `long:"lazamar"`
