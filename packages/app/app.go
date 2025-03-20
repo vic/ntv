@@ -30,8 +30,7 @@ func App() cli.App {
 				Name: "version",
 			},
 			&cli.BoolFlag{
-				Name:  "lazamar",
-				Value: true,
+				Name: "lazamar",
 				Action: func(ctx *cli.Context, b bool) error {
 					ctx.Set("nixhub", strconv.FormatBool(!b))
 					return nil
@@ -46,7 +45,8 @@ func App() cli.App {
 				},
 			},
 			&cli.BoolFlag{
-				Name: "nixhub",
+				Name:  "nixhub",
+				Value: true,
 				Action: func(ctx *cli.Context, b bool) error {
 					ctx.Set("lazamar", strconv.FormatBool(!b))
 					return nil
