@@ -28,8 +28,17 @@ Or use directly from github
 #### Examples
 
 ```shell
-# List known versions of emacs
-> nix-versions emacs
+# Show known versions of emacs on Lazamar-index (including emacs-nox, emacs-gtk, etc)
+> nix-versions --lazamar emacs
+
+
+# don't include packages with other attribute names like, emacs-nox, emacs-gtk, etc.
+> nix-versions --lazamar --exact emacs
+
+
+# Latest versions of packages providing `pwd`.
+# --exact means that packages must provide an executable named exactly `pwd`.
+> nix-versions --exact bin/pwd@latest
 
 
 # Latest versions of packages providing some executable programs.
