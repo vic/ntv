@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	flags "github.com/jessevdk/go-flags"
+	"github.com/jessevdk/go-flags"
 )
 
 //go:embed APP_HELP
