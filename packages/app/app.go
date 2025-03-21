@@ -40,9 +40,11 @@ type CliArgs struct {
 	OnText        func()       `long:"text"`
 	OnInstallable func()       `long:"installable"`
 	OnFlake       func()       `long:"flake"`
+	OnWrite       func(string) `long:"out" short:"o"`
 	Lazamar       bool
 	Channel       string
 	OutType       OutputType
+	WriteTo       string
 	Color         bool   `long:"color"`
 	One           bool   `long:"assert-one"`
 	Sort          bool   `long:"sort"`
@@ -89,12 +91,14 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 		cliArgs.OutType = Text
 	}
 	cliArgs.OnInstallable = func() {
-		cliArgs.One = true
 		cliArgs.OutType = Installable
 	}
 	cliArgs.OnFlake = func() {
-		cliArgs.One = true
 		cliArgs.OutType = Flake
+	}
+	cliArgs.OnWrite = func(s string) {
+		cliArgs.One = true
+		cliArgs.WriteTo = s
 	}
 	parser := flags.NewParser(&cliArgs, flags.AllowBoolValues)
 	names, err := parser.ParseArgs(args)
@@ -156,9 +160,18 @@ func MainAction(ctx CliArgs) error {
 			}
 		}
 		if anyFailed {
+			str = lib.VersionsTable(versions, ctx.Color)
 			fmt.Fprint(os.Stderr, str, "\n")
 			return fmt.Errorf("Assertion failure. Expected at most one version per package.\nBut got %v.\nTry using @latest or a more specific version constraint.", seen)
 		}
+	}
+
+	if ctx.WriteTo != "" && ctx.WriteTo != "-" {
+		err := os.WriteFile(ctx.WriteTo, []byte(str), 0644)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 
 	fmt.Println(str)

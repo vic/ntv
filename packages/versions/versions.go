@@ -122,8 +122,20 @@ func VersionsTable(versions []Version, useColor bool) string {
 	return buff.String()
 }
 
+type VersionAndAttribute struct {
+	Version   string `json:"version"`
+	Attribute string `json:"attribute"`
+}
+
 func Flake(versions []Version) (string, error) {
-	jsonBytes, err := json.MarshalIndent(versions, "    ", "  ")
+	namesToAttrs := make(map[string]VersionAndAttribute)
+	for _, version := range versions {
+		namesToAttrs[version.Name] = VersionAndAttribute{
+			Version:   version.Version,
+			Attribute: version.Attribute,
+		}
+	}
+	jsonBytes, err := json.MarshalIndent(namesToAttrs, "    ", "  ")
 	if err != nil {
 		return "", err
 	}
@@ -135,23 +147,14 @@ func Flake(versions []Version) (string, error) {
 	buff.WriteString("  inputs.nix-versions.inputs.nixpkgs.follows = \"nixpkgs\";\n")
 	for _, version := range versions {
 		name := version.Name
-		attr := version.Attribute
 		emptyRevs := []string{"master", "main", "HEAD", ""}
-		var (
-			url  string
-			vers string
-		)
+		var url string
 		if slices.Contains(emptyRevs, version.Revision) {
 			url = version.Flake
 		} else {
 			url = fmt.Sprintf("%s/%s", version.Flake, version.Revision)
 		}
-		vers = version.Version
-		if version.Version == "" {
-			vers = "latest"
-		}
-		comment := fmt.Sprintf(" # %s@%s", attr, vers)
-		buff.WriteString(fmt.Sprintf("  inputs.\"%s\".url = \"%s\";%s\n", name, url, comment))
+		buff.WriteString(fmt.Sprintf("  inputs.\"%s\".url = \"%s\";\n", name, url))
 	}
 	buff.WriteString("  outputs = inputs@{nixpkgs, self, ...}: inputs.nix-versions.lib.mkFlake {\n")
 	buff.WriteString("    inherit inputs;\n")
