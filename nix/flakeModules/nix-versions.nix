@@ -10,7 +10,8 @@ let
         let
           name-path = lib.splitString "." nv.name;
           attr-path = lib.splitString "." nv.attr_path;
-          pkgs' = inputs.${nv.name}.legacyPackages.${pkgs.system};
+          pkgs' =
+            inputs.${nv.name}.packages.${pkgs.system} or inputs.${nv.name}.legacyPackages.${pkgs.system};
           pkg = lib.getAttrFromPath attr-path pkgs';
           attr = lib.setAttrByPath name-path pkg;
         in
@@ -38,9 +39,14 @@ let
       paths = nv-packages-list pkgs;
     };
 
+  devShell =
+    pkgs:
+    pkgs.mkShell {
+      buildInputs = [ (packagesEnv pkgs) ];
+    };
+
 in
 {
-
   flake.lib.nix-versions = nix-versions;
   flake.overlays.default = overlay;
 
@@ -48,9 +54,7 @@ in
     { pkgs, ... }:
     {
       packages = nv-packages-set pkgs;
-      devShells.default = pkgs.mkShell {
-        buildInputs = [ (packagesEnv pkgs) ];
-      };
+      devShells.default = devShell pkgs;
     }
   );
 

@@ -155,6 +155,7 @@ func Flake(versions []Version) (string, error) {
 	}
 	buff.WriteString("  outputs = inputs@{nixpkgs, self, ...}: inputs.nix-versions.lib.mkFlake {\n")
 	buff.WriteString("    inherit inputs;\n")
+	buff.WriteString("    flakeModule = ./flakeModule.nix;\n")
 	buff.WriteString(fmt.Sprintf("    nix-versions = builtins.fromJSON ''%s'';\n", json))
 	buff.WriteString("  };\n")
 	buff.WriteString("}\n")
