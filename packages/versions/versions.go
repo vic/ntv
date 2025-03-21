@@ -133,7 +133,6 @@ func Flake(versions []Version) (string, error) {
 	buff.WriteString("{\n")
 	buff.WriteString("  inputs.nix-versions.url = \"github:vic/nix-versions\";\n")
 	buff.WriteString("  inputs.nix-versions.inputs.nixpkgs.follows = \"nixpkgs\";\n")
-	buff.WriteString("  inputs.nix-versions.inputs.treefmt-nix.inputs.nixpkgs.follows = \"nixpkgs\";\n")
 	for _, version := range versions {
 		name := version.Name
 		attr := version.Attribute
