@@ -20,6 +20,15 @@ var AppVersion string
 //go:embed REVISION
 var AppRevision string
 
+type OutputType int
+
+const (
+	Text OutputType = iota
+	Json
+	Installable
+	Flake
+)
+
 type CliArgs struct {
 	OnHelp        func()       `long:"help" short:"h"`
 	OnVersion     func()       `long:"version"`
@@ -29,9 +38,10 @@ type CliArgs struct {
 	OnJson        func()       `long:"json"`
 	OnText        func()       `long:"text"`
 	OnInstallable func()       `long:"installable"`
+	OnFlake       func()       `long:"flake"`
 	Lazamar       bool
 	Channel       string
-	OutFmt        string
+	OutType       OutputType
 	One           bool   `long:"assert-one"`
 	Sort          bool   `long:"sort"`
 	Reverse       bool   `long:"reverse"`
@@ -44,7 +54,6 @@ type CliArgs struct {
 func ParseCliArgs(args []string) (CliArgs, error) {
 	var cliArgs = CliArgs{
 		Channel: "nixpkgs-unstable",
-		OutFmt:  "text",
 		Sort:    true,
 	}
 	cliArgs.OnHelp = func() {
@@ -71,13 +80,16 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 		cliArgs.Lazamar = true
 	}
 	cliArgs.OnJson = func() {
-		cliArgs.OutFmt = "json"
+		cliArgs.OutType = Json
 	}
 	cliArgs.OnText = func() {
-		cliArgs.OutFmt = "text"
+		cliArgs.OutType = Text
 	}
 	cliArgs.OnInstallable = func() {
-		cliArgs.OutFmt = "installable"
+		cliArgs.OutType = Installable
+	}
+	cliArgs.OnFlake = func() {
+		cliArgs.OutType = Flake
 	}
 	parser := flags.NewParser(&cliArgs, flags.AllowBoolValues)
 	names, err := parser.ParseArgs(args)
@@ -113,13 +125,18 @@ func MainAction(ctx CliArgs) error {
 		return err
 	}
 
-	if ctx.OutFmt == "json" {
+	if ctx.OutType == Json {
 		str, err = lib.VersionsJson(versions)
 		if err != nil {
 			return err
 		}
-	} else if ctx.OutFmt == "installable" {
+	} else if ctx.OutType == Installable {
 		str = lib.Installables(versions)
+	} else if ctx.OutType == Flake {
+		str, err = lib.Flake(versions)
+		if err != nil {
+			return err
+		}
 	} else {
 		str = lib.VersionsTable(versions)
 	}

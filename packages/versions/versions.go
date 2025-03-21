@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
@@ -111,6 +112,43 @@ func VersionsTable(versions []Version) string {
 	}
 	tbl.Print()
 	return buff.String()
+}
+
+func Flake(versions []Version) (string, error) {
+	jsonBytes, err := json.MarshalIndent(versions, "    ", "  ")
+	if err != nil {
+		return "", err
+	}
+	json := string(jsonBytes)
+
+	var buff bytes.Buffer
+	buff.WriteString("{\n")
+	buff.WriteString("  inputs.nix-versions.url = \"github:vic/nix-versions\";\n")
+	buff.WriteString("  inputs.nix-versions.inputs.nixpkgs.follows = \"nixpkgs\";\n")
+	buff.WriteString("  inputs.nix-versions.inputs.treefmt-nix.inputs.nixpkgs.follows = \"nixpkgs\";\n")
+	for _, version := range versions {
+		name := version.Attribute
+		emptyRevs := []string{"master", "main", "HEAD", ""}
+		var (
+			url     string
+			comment string
+		)
+		if slices.Contains(emptyRevs, version.Revision) {
+			url = version.Flake
+		} else {
+			url = fmt.Sprintf("%s/%s", version.Flake, version.Revision)
+		}
+		if version.Version != "" {
+			comment = fmt.Sprintf(" # version: %s", version.Version)
+		}
+		buff.WriteString(fmt.Sprintf("  inputs.\"%s\".url = \"%s\";%s\n", name, url, comment))
+	}
+	buff.WriteString("  outputs = inputs@{nixpkgs, self, ...}: inputs.nix-versions.lib.mkFlake {\n")
+	buff.WriteString("    inherit inputs;\n")
+	buff.WriteString(fmt.Sprintf("    nix-versions = builtins.fromJSON ''%s'';\n", json))
+	buff.WriteString("  };\n")
+	buff.WriteString("}\n")
+	return buff.String(), nil
 }
 
 func Installables(versions []Version) string {
