@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/fatih/color"
 	"github.com/rodaine/table"
 )
 
@@ -17,6 +18,7 @@ import (
 //	Each nixpkgs checkout is about 40M
 //	--optimize=true
 type Version struct {
+	Name      string `json:"name"`
 	Attribute string `json:"attr_path"`
 	Version   string `json:"version"`
 	Flake     string `json:"flake"`
@@ -103,12 +105,18 @@ func VersionsJson(versions []Version) (string, error) {
 	return string(bytes), nil
 }
 
-func VersionsTable(versions []Version) string {
+func VersionsTable(versions []Version, useColor bool) string {
+	cyan := color.New(color.FgCyan)
+	cyanS := cyan.SprintFunc()
+	if !useColor {
+		cyan.DisableColor()
+	}
+
 	var buff bytes.Buffer
 	var tbl table.Table
-	tbl = table.New("Version", "Attribute", "Flake", "Revision").WithWriter(&buff).WithPrintHeaders(len(versions) > 1)
+	tbl = table.New("Name", "Attribute", cyanS("Version"), "Flake", "Revision").WithWriter(&buff).WithPrintHeaders(len(versions) > 1)
 	for _, version := range versions {
-		tbl = tbl.AddRow(version.Version, version.Attribute, version.Flake, version.Revision)
+		tbl = tbl.AddRow(version.Name, version.Attribute, cyanS(version.Version), version.Flake, version.Revision)
 	}
 	tbl.Print()
 	return buff.String()
@@ -127,20 +135,23 @@ func Flake(versions []Version) (string, error) {
 	buff.WriteString("  inputs.nix-versions.inputs.nixpkgs.follows = \"nixpkgs\";\n")
 	buff.WriteString("  inputs.nix-versions.inputs.treefmt-nix.inputs.nixpkgs.follows = \"nixpkgs\";\n")
 	for _, version := range versions {
-		name := version.Attribute
+		name := version.Name
+		attr := version.Attribute
 		emptyRevs := []string{"master", "main", "HEAD", ""}
 		var (
-			url     string
-			comment string
+			url  string
+			vers string
 		)
 		if slices.Contains(emptyRevs, version.Revision) {
 			url = version.Flake
 		} else {
 			url = fmt.Sprintf("%s/%s", version.Flake, version.Revision)
 		}
-		if version.Version != "" {
-			comment = fmt.Sprintf(" # version: %s", version.Version)
+		vers = version.Version
+		if version.Version == "" {
+			vers = "latest"
 		}
+		comment := fmt.Sprintf(" # %s@%s", attr, vers)
 		buff.WriteString(fmt.Sprintf("  inputs.\"%s\".url = \"%s\";%s\n", name, url, comment))
 	}
 	buff.WriteString("  outputs = inputs@{nixpkgs, self, ...}: inputs.nix-versions.lib.mkFlake {\n")
@@ -155,23 +166,15 @@ func Installables(versions []Version) string {
 	var buff bytes.Buffer
 	// stat, _ := os.Stdout.Stat()
 	// piped := stat.Mode()&os.ModeCharDevice == 0
-	// if piped {
-	// 	for n, version := range versions {
-	// 		buff.WriteString(fmt.Sprintf("%s/%s#%s", version.Flake, version.Revision, version.Attribute))
-	// 		if n < len(versions)-1 {
-	// 			buff.WriteString("\n")
-	// 		}
-	// 	}
-	// 	return buff.String()
-	// }
 	var tbl table.Table
 	tbl = table.New("Installable", "Comment").WithWriter(&buff).WithPrintHeaders(false)
 	for _, version := range versions {
 		installable := fmt.Sprintf("%s/%s#%s", version.Flake, version.Revision, version.Attribute)
-		var comment string
-		if version.Version != "" {
-			comment = fmt.Sprintf("# version: %s", version.Version)
+		var vrs string = version.Version
+		if vrs == "" {
+			vrs = "latest"
 		}
+		comment := fmt.Sprintf("# %s@%s", version.Name, vrs)
 		tbl = tbl.AddRow(installable, comment)
 	}
 	tbl.Print()

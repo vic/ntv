@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	flags "github.com/jessevdk/go-flags"
+	"github.com/mattn/go-isatty"
 	find "github.com/vic/nix-versions/packages/find"
 	lib "github.com/vic/nix-versions/packages/versions"
 )
@@ -42,6 +43,7 @@ type CliArgs struct {
 	Lazamar       bool
 	Channel       string
 	OutType       OutputType
+	Color         bool   `long:"color"`
 	One           bool   `long:"assert-one"`
 	Sort          bool   `long:"sort"`
 	Reverse       bool   `long:"reverse"`
@@ -55,6 +57,7 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 	var cliArgs = CliArgs{
 		Channel: "nixpkgs-unstable",
 		Sort:    true,
+		Color:   isatty.IsTerminal(os.Stdout.Fd()),
 	}
 	cliArgs.OnHelp = func() {
 		fmt.Println(AppHelp)
@@ -86,9 +89,11 @@ func ParseCliArgs(args []string) (CliArgs, error) {
 		cliArgs.OutType = Text
 	}
 	cliArgs.OnInstallable = func() {
+		cliArgs.One = true
 		cliArgs.OutType = Installable
 	}
 	cliArgs.OnFlake = func() {
+		cliArgs.One = true
 		cliArgs.OutType = Flake
 	}
 	parser := flags.NewParser(&cliArgs, flags.AllowBoolValues)
@@ -138,21 +143,21 @@ func MainAction(ctx CliArgs) error {
 			return err
 		}
 	} else {
-		str = lib.VersionsTable(versions)
+		str = lib.VersionsTable(versions, ctx.Color)
 	}
 
 	if ctx.One {
 		var seen = make(map[string]int)
 		var anyFailed = false
 		for _, v := range versions {
-			seen[v.Attribute]++
-			if seen[v.Attribute] > 1 {
+			seen[v.Name]++
+			if seen[v.Name] > 1 {
 				anyFailed = true
 			}
 		}
 		if anyFailed {
 			fmt.Fprint(os.Stderr, str, "\n")
-			return fmt.Errorf("Assertion failure. Expected at most one version per package. But got %v", seen)
+			return fmt.Errorf("Assertion failure. Expected at most one version per package.\nBut got %v.\nTry using @latest or a more specific version constraint.", seen)
 		}
 	}
 

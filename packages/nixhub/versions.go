@@ -19,6 +19,7 @@ type release struct {
 }
 
 type response struct {
+	Name     string    `json:"name"`
 	Releases []release `json:"releases"`
 }
 
@@ -40,6 +41,7 @@ func Versions(name string) ([]lib.Version, error) {
 	for _, release := range body.Releases {
 		platform := release.Platforms[len(release.Platforms)-1]
 		version := lib.Version{
+			Name:      body.Name,
 			Attribute: platform.AttributePath,
 			Version:   release.Version,
 			Revision:  platform.CommitHash,

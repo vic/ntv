@@ -40,6 +40,7 @@ func Versions(name string, channel string) ([]lib.Version, error) {
 		}
 		query := href.Query()
 		version := lib.Version{
+			Name:      query.Get("package"),
 			Attribute: query.Get("keyName"),
 			Version:   query.Get("version"),
 			Revision:  query.Get("revision"),

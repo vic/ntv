@@ -87,7 +87,7 @@ func Test_readPackagesFromFile_dot_nix_tools(t *testing.T) {
 	if len(arr) != 6 {
 		t.Error(len(arr))
 	}
-	if arr[0] != "nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#cargo#1.85.0" {
+	if arr[0] != "nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#cargo#cargo#1.85.0" {
 		t.Error(arr[0])
 	}
 	if arr[1] != "nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#rustc" {
@@ -96,7 +96,7 @@ func Test_readPackagesFromFile_dot_nix_tools(t *testing.T) {
 	if arr[2] != "nixpkgs/master#hello" {
 		t.Error(arr[2])
 	}
-	if arr[3] != "nixpkgs#btop#1.0" {
+	if arr[3] != "nixpkgs#btop#btop#1.0" {
 		t.Error(arr[3])
 	}
 	if arr[4] != "bin/emacs@~25" {
@@ -120,11 +120,14 @@ func Test_isInstallable_default_app(t *testing.T) {
 }
 
 func Test_fromInstallableStr_preserves_meta_version(t *testing.T) {
-	v := fromInstallableStr("nixpkgs/HEAD#hello#1.0.0")
+	v := fromInstallableStr("nixpkgs/HEAD#some.hello#hello#1.0.0")
+	if v.Name != "hello" {
+		t.Error("should preserve name", v)
+	}
 	if v.Version != "1.0.0" {
 		t.Error("should preserve version", v)
 	}
-	if v.Attribute != "hello" {
+	if v.Attribute != "some.hello" {
 		t.Error("should preserve attribute", v)
 	}
 	if v.Revision != "HEAD" {
@@ -168,7 +171,10 @@ func Test_fromInstallableStr_with_registry(t *testing.T) {
 }
 
 func Test_fromInstallableStr_with_registry_and_meta_version(t *testing.T) {
-	v := fromInstallableStr("nixpkgs#hello#3.0")
+	v := fromInstallableStr("nixpkgs#hello#hey#3.0")
+	if v.Name != "hey" {
+		t.Error("should preserve name", v)
+	}
 	if v.Version != "3.0" {
 		t.Error("should preserve version", v)
 	}

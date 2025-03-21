@@ -37,9 +37,9 @@ var (
 )
 
 func init() {
-	RE_NIX_TOOL = regexp.MustCompile(`^([^ #]+[^ ]+)[ ]*(# version: ([^ #]+))?`)
-	RE_NIX_INSTALLABLE = regexp.MustCompile(`^([^#]+/)([^#]+)#([^# ]+)(#([^ #]+))?`)
-	RE_NIX_INSTALLABLE_SHORT = regexp.MustCompile(`^([^#/]+)#([^# ]+)(#([^ #]+))?`)
+	RE_NIX_TOOL = regexp.MustCompile(`^([^ #]+[^ ]+)[ ]*(# ([^ #]+)@([^ #]+))?`)
+	RE_NIX_INSTALLABLE = regexp.MustCompile(`^([^#]+/)([^#]+)#([^# ]+)(#([^ #]+)#([^ #]+))?`)
+	RE_NIX_INSTALLABLE_SHORT = regexp.MustCompile(`^([^#/]+)#([^# ]+)(#([^ #]+)#([^ #]+))?`)
 
 	TOOL_FILE_READERS = map[string](func(string) (*string, error)){
 		".node-version": readConstraint,
@@ -151,8 +151,8 @@ func readNixTools(file string) ([]string, error) {
 		if len(match) > 1 {
 			name := match[1]
 			if isInstallable(name) {
-				if len(match) > 3 && match[3] != "" {
-					name = name + "#" + match[3]
+				if len(match) > 4 && match[4] != "" {
+					name = name + "#" + match[3] + "#" + match[4]
 				}
 				names = append(names, name)
 			} else {
@@ -217,11 +217,15 @@ func fromInstallableStr(str string) lib.Version {
 		revision string
 		attr     string
 		version  string
+		name     string
 	)
 	match := RE_NIX_INSTALLABLE.FindStringSubmatch(str)
 	if len(match) > 0 {
+		if len(match) > 6 {
+			version = match[6]
+		}
 		if len(match) > 5 {
-			version = match[5]
+			name = match[5]
 		}
 		if len(match) > 3 {
 			attr = match[3]
@@ -232,8 +236,11 @@ func fromInstallableStr(str string) lib.Version {
 		flake = strings.TrimRight(match[1], "/")
 	} else {
 		match := RE_NIX_INSTALLABLE_SHORT.FindStringSubmatch(str)
+		if len(match) > 5 {
+			version = match[5]
+		}
 		if len(match) > 4 {
-			version = match[4]
+			name = match[4]
 		}
 		if len(match) > 2 {
 			attr = match[2]
@@ -242,6 +249,7 @@ func fromInstallableStr(str string) lib.Version {
 		revision = "HEAD"
 	}
 	result := lib.Version{
+		Name:      name,
 		Version:   version,
 		Flake:     flake,
 		Revision:  revision,
