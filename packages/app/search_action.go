@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	find "github.com/vic/nix-versions/packages/find"
+	"github.com/vic/nix-versions/packages/marshalling"
+	"github.com/vic/nix-versions/packages/search"
 	lib "github.com/vic/nix-versions/packages/versions"
 )
 
@@ -29,7 +30,7 @@ func (ctx *SearchArgs) SearchAction() error {
 		str      string
 	)
 
-	opts := find.Opts{
+	opts := search.Opts{
 		One:        ctx.One,
 		Exact:      ctx.Exact,
 		Constraint: ctx.Constraint,
@@ -40,25 +41,25 @@ func (ctx *SearchArgs) SearchAction() error {
 		Channel:    ctx.Channel,
 	}
 
-	versions, err = find.FindReadingVersionsAll(opts, ctx.Names)
+	versions, err = search.FindReadingVersionsAll(opts, ctx.Names)
 	if err != nil {
 		return err
 	}
 
 	if ctx.OutType == Json {
-		str, err = lib.VersionsJson(versions)
+		str, err = marshalling.VersionsJson(versions)
 		if err != nil {
 			return err
 		}
 	} else if ctx.OutType == Installable {
-		str = lib.Installables(versions)
+		str = marshalling.Installables(versions)
 	} else if ctx.OutType == Flake {
-		str, err = lib.Flake(versions)
+		str, err = marshalling.Flake(versions)
 		if err != nil {
 			return err
 		}
 	} else {
-		str = lib.VersionsTable(versions, ctx.Color)
+		str = marshalling.VersionsTable(versions, ctx.Color)
 	}
 
 	if ctx.One {
@@ -71,7 +72,7 @@ func (ctx *SearchArgs) SearchAction() error {
 			}
 		}
 		if anyFailed {
-			str = lib.VersionsTable(versions, ctx.Color)
+			str = marshalling.VersionsTable(versions, ctx.Color)
 			fmt.Fprint(os.Stderr, str, "\n")
 			return fmt.Errorf("Assertion failure. Expected at most one version per package.\nBut got %v.\nTry using @latest or a more specific version constraint.", seen)
 		}

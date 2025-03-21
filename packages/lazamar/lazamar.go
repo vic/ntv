@@ -11,7 +11,7 @@ import (
 	lib "github.com/vic/nix-versions/packages/versions"
 )
 
-func Versions(name string, channel string) ([]lib.Version, error) {
+func Search(name string, channel string) ([]lib.Version, error) {
 	var (
 		body   string
 		result []lib.Version

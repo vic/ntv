@@ -1,4 +1,4 @@
-package find
+package marshalling
 
 import (
 	"os"
@@ -29,7 +29,7 @@ func Test_readConstraint_trims(t *testing.T) {
 }
 
 func Test_readPackagesFromFile_at_node_version(t *testing.T) {
-	arr, err := readPackagesFromFile("node@testdata/.node-version")
+	arr, err := ReadPackagesFromFile("node@testdata/.node-version")
 	if err != nil {
 		t.Error(err)
 		return
@@ -40,7 +40,7 @@ func Test_readPackagesFromFile_at_node_version(t *testing.T) {
 }
 
 func Test_readPackagesFromFile_at_nonfile(t *testing.T) {
-	arr, err := readPackagesFromFile("node@<23")
+	arr, err := ReadPackagesFromFile("node@<23")
 	if err != nil {
 		t.Error(err)
 		return
@@ -58,7 +58,7 @@ func Test_readPackagesFromFile_nix_tools(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	arr, err := readPackagesFromFile("@nix-tools")
+	arr, err := ReadPackagesFromFile("@nix-tools")
 	if err != nil {
 		t.Error(err)
 		return
@@ -79,7 +79,7 @@ func Test_readPackagesFromFile_dot_nix_tools(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	arr, err := readPackagesFromFile("@.nix-tools")
+	arr, err := ReadPackagesFromFile("@.nix-tools")
 	if err != nil {
 		t.Error(err)
 		return
@@ -108,19 +108,19 @@ func Test_readPackagesFromFile_dot_nix_tools(t *testing.T) {
 }
 
 func Test_isInstallable_head_hello(t *testing.T) {
-	if !isInstallable("nixpkgs/HEAD#hello") {
+	if !IsInstallable("nixpkgs/HEAD#hello") {
 		t.Error("should be installable")
 	}
 }
 
 func Test_isInstallable_default_app(t *testing.T) {
-	if !isInstallable("github:vic/nix-versions") {
+	if !IsInstallable("github:vic/nix-versions") {
 		t.Error("should be installable")
 	}
 }
 
 func Test_fromInstallableStr_preserves_meta_version(t *testing.T) {
-	v := fromInstallableStr("nixpkgs/HEAD#some.hello#hello#1.0.0")
+	v := FromInstallableStr("nixpkgs/HEAD#some.hello#hello#1.0.0")
 	if v.Name != "hello" {
 		t.Error("should preserve name", v)
 	}
@@ -139,7 +139,7 @@ func Test_fromInstallableStr_preserves_meta_version(t *testing.T) {
 }
 
 func Test_fromInstallableStr_with_no_meta_version(t *testing.T) {
-	v := fromInstallableStr("github:nixos/nixpkgs/master#hello")
+	v := FromInstallableStr("github:nixos/nixpkgs/master#hello")
 	if v.Version != "" {
 		t.Error("should preserve version", v)
 	}
@@ -155,7 +155,7 @@ func Test_fromInstallableStr_with_no_meta_version(t *testing.T) {
 }
 
 func Test_fromInstallableStr_with_registry(t *testing.T) {
-	v := fromInstallableStr("nixpkgs#hello")
+	v := FromInstallableStr("nixpkgs#hello")
 	if v.Version != "" {
 		t.Error("should preserve version", v)
 	}
@@ -171,7 +171,7 @@ func Test_fromInstallableStr_with_registry(t *testing.T) {
 }
 
 func Test_fromInstallableStr_with_registry_and_meta_version(t *testing.T) {
-	v := fromInstallableStr("nixpkgs#hello#hey#3.0")
+	v := FromInstallableStr("nixpkgs#hello#hey#3.0")
 	if v.Name != "hey" {
 		t.Error("should preserve name", v)
 	}
