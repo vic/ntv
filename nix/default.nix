@@ -9,6 +9,9 @@ flake-parts.lib.mkFlake { inputs = nv-inputs; } {
     { inputs, nix-versions }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = import systems;
-      flake.lib.nix-versions = nix-versions;
+      imports = [
+        { _module.args = { inherit nix-versions; }; }
+        ./flakeModules/nix-versions.nix
+      ];
     };
 }
