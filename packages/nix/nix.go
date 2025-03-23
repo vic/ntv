@@ -1,10 +1,13 @@
 package nix
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"slices"
 )
+
+type JsonMap = map[string]interface{}
 
 var (
 	flakes_enabled []string
@@ -19,7 +22,7 @@ func init() {
 
 func Run(bin string, args ...string) (string, error) {
 	cmd := exec.Command(bin, args...)
-	cmd.Stderr = os.Stderr
+	cmd.Stderr = nil // capture stdout on err
 	output, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -27,7 +30,7 @@ func Run(bin string, args ...string) (string, error) {
 	return string(output), nil
 }
 
-func FlakeRun(args ...string) (string, error) {
+func NixRun(args ...string) (string, error) {
 	return Run("nix", slices.Concat(flakes_enabled, args)...)
 }
 
@@ -57,7 +60,7 @@ func JsonToNix(json string) (string, error) {
 }
 
 func Nixfmt(args ...string) error {
-	_, err := FlakeRun(
+	_, err := NixRun(
 		slices.Concat(
 			[]string{"run", "nixpkgs#nixfmt-rfc-style", "--"},
 			args,
@@ -85,9 +88,33 @@ func NixfmtCode(code string) (string, error) {
 	Nixfmt(tmpFile.Name())
 
 	res, err := os.ReadFile(tmpFile.Name())
+
 	return string(res), err
 }
 
 func NvJSON(flakePath string) (string, error) {
-	return FlakeRun("eval", "--json", (flakePath + "#lib.nix-versions"))
+	return NixRun("eval", "--json", (flakePath + "#lib.nix-versions"))
+}
+
+type PackageVersion struct {
+	PackageName string
+	Version     string
+}
+
+func InstallablePackageVersion(installable string) (*PackageVersion, error) {
+	out, err := NixRun("eval", "--json", installable, "--apply", "p: { version = p.version; name = builtins.replaceStrings [(\"-\" + p.version)] [\"\"] (p.pname or p.name); }")
+	if err != nil {
+		return nil, err
+	}
+	type JsonMap = map[string]interface{}
+	obj := JsonMap{}
+	err = json.Unmarshal([]byte(out), &obj)
+	if err != nil {
+		return nil, err
+	}
+	pv := PackageVersion{
+		PackageName: obj["name"].(string),
+		Version:     obj["version"].(string),
+	}
+	return &pv, nil
 }

@@ -2,9 +2,11 @@ package app
 
 import (
 	"fmt"
+	"os/exec"
 
 	"github.com/vic/nix-versions/packages/flake"
 	"github.com/vic/nix-versions/packages/search"
+	"github.com/vic/nix-versions/packages/search_spec"
 )
 
 func (a *InitArgs) Run() error {
@@ -29,18 +31,19 @@ func (a *InitArgs) Run() error {
 }
 
 func (a *InitArgs) addPackages(f *flake.Context) error {
-	var specs search.PackageSearchSpecs
-	for _, pkg := range a.rest {
-		s, err := search.NewPackageSearchSpec(pkg)
-		if err != nil {
-			return err
-		}
-		specs = append(specs, s)
-		s.LatestUnlessExplicitConstraint()
+	specs, err := search_spec.ParseSearchSpecs(a.rest)
+	if err != nil {
+		return err
 	}
 
-	res, err := specs.Search()
+	res, err := search.PackageSearchSpecs(specs).Search()
 	if err != nil {
+		if ee, ok := err.(*exec.ExitError); ok {
+			return fmt.Errorf("%v: %s", err, string(ee.Stderr))
+		}
+		return err
+	}
+	if err = res.SelectLatest(); err != nil {
 		return err
 	}
 	if err = res.EnsureUniquePackageNames(); err != nil {

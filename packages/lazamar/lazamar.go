@@ -23,7 +23,7 @@ func Search(name string, channel string) ([]lib.Version, error) {
 		ToString(&body).
 		Fetch(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Error fetching versions from lazamar.co.uk for `%s`: %v\nPerhaps the package is not available on nixpkgs under the `%s` name.\nTry using `~%s` as argument or use https://search.nixos.org/packages?query=%s to find the proper attribute name.", name, err, name, name, name)
+		return nil, fmt.Errorf("error fetching versions from lazamar.co.uk for `%s`: %v\nPerhaps the package is not available on nixpkgs under the `%s` name.\nTry using `~%s` as argument or use https://search.nixos.org/packages?query=%s to find the proper attribute name", name, err, name, name, name)
 	}
 	doc, err := htmlquery.Parse(strings.NewReader(body))
 	if err != nil {
@@ -31,7 +31,7 @@ func Search(name string, channel string) ([]lib.Version, error) {
 	}
 	list := htmlquery.Find(doc, "/html/body/section/table/tbody/tr/td/a/@href")
 	if len(list) == 0 {
-		return nil, fmt.Errorf("No versions found on lazamar.co.uk for `%s`.\nPerhaps the package is not available on nixpkgs under the `%s` name.\nTry using `~%s` as argument or use https://search.nixos.org/packages?query=%s to find the proper attribute name.", name, name, name, name)
+		return nil, fmt.Errorf("no versions found on lazamar.co.uk for `%s`.\nPerhaps the package is not available on nixpkgs under the `%s` name.\nTry using `~%s` as argument or use https://search.nixos.org/packages?query=%s to find the proper attribute name", name, name, name, name)
 	}
 	for _, link := range list {
 		href, err := url.Parse(htmlquery.InnerText(link))
@@ -48,5 +48,6 @@ func Search(name string, channel string) ([]lib.Version, error) {
 		}
 		result = append(result, version)
 	}
+
 	return result, nil
 }

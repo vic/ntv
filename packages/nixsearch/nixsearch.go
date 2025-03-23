@@ -2,7 +2,6 @@ package nixsearch
 
 import (
 	"context"
-	"fmt"
 	"slices"
 
 	lib "github.com/peterldowns/nix-search-cli/pkg/nixsearch"
@@ -31,9 +30,6 @@ func FindPackagesWithQuery(maxRes int, search string) ([]string, error) {
 	var names []string
 	for _, pkg := range packages {
 		names = append(names, pkg.AttrName)
-	}
-	if len(names) < 1 {
-		return nil, fmt.Errorf("No packages found matching `%s`.", search)
 	}
 	return names, nil
 }
@@ -67,9 +63,6 @@ func FindPackagesWithProgram(maxRes int, exact bool, program string) ([]string, 
 		} else {
 			names = append(names, pkg.AttrName)
 		}
-	}
-	if len(names) < 1 {
-		return nil, fmt.Errorf("No packages found providing program `bin/%s`.\nTry using `--exact=false` option to match on any part of the program name.", program)
 	}
 	return names, nil
 }

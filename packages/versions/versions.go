@@ -3,6 +3,7 @@ package versions
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver/v3"
 )
@@ -56,9 +57,13 @@ func Limit(versions []Version, n int) []Version {
 }
 
 func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
+	constraint = strings.Replace(constraint, "latest", "", 1)
+	if strings.TrimSpace(constraint) == "" {
+		constraint = "*"
+	}
 	cond, err := semver.NewConstraint(constraint)
 	if err != nil {
-		return nil, fmt.Errorf("Could not create constraint from `%s`: %v\nSee https://github.com/Masterminds/semver?tab=readme-ov-file#basic-comparisons", constraint, err)
+		return nil, fmt.Errorf("could not create constraint from string `%s`:\n%v\nSee https://github.com/Masterminds/semver?tab=readme-ov-file#basic-comparisons", constraint, err)
 	}
 	var res []Version
 	for _, ver := range versions {
