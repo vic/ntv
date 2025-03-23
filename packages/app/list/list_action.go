@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"slices"
 
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
 
+	"github.com/vic/ntv/packages/app/new"
 	"github.com/vic/ntv/packages/flake"
 	"github.com/vic/ntv/packages/search"
 	"github.com/vic/ntv/packages/search_spec"
@@ -23,14 +23,7 @@ func (a *ListArgs) Run() error {
 
 	res, err := search.PackageSearchSpecs(specs).Search()
 	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("%v: %s", err, string(ee.Stderr))
-		}
 		return err
-	}
-
-	if len(res) == 0 {
-		return fmt.Errorf("no results found")
 	}
 
 	var out string
@@ -42,21 +35,22 @@ func (a *ListArgs) Run() error {
 	}
 
 	if a.OutFmt == OutInstallable {
-		out, err = a.InstallableOut(res)
+		out, err = InstallableOut(res)
 		if err != nil {
 			return err
 		}
 	}
 
 	if a.OutFmt == OutJSON {
-		out, err = a.JsonOut(res)
+		out, err = JsonOut(res)
 		if err != nil {
 			return err
 		}
 	}
 
 	if a.OutFmt == OutFlake {
-		out, err = a.FlakeOut(res)
+		f := flake.New()
+		out, err = new.FlakeCode(f, res)
 		if err != nil {
 			return err
 		}
@@ -66,23 +60,7 @@ func (a *ListArgs) Run() error {
 	return nil
 }
 
-func (a *ListArgs) FlakeOut(res search.PackageSearchResults) (string, error) {
-	if err := res.EnsureOneSelected(); err != nil {
-		return "", err
-	}
-	if err := res.EnsureUniquePackageNames(); err != nil {
-		return "", err
-	}
-
-	f := flake.New()
-	for _, r := range res {
-		f.AddTool(r)
-	}
-
-	return f.Render()
-}
-
-func (a *ListArgs) JsonOut(res search.PackageSearchResults) (string, error) {
+func JsonOut(res search.PackageSearchResults) (string, error) {
 	if err := res.EnsureOneSelected(); err != nil {
 		return "", err
 	}
@@ -104,7 +82,7 @@ func (a *ListArgs) JsonOut(res search.PackageSearchResults) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (a *ListArgs) InstallableOut(res search.PackageSearchResults) (string, error) {
+func InstallableOut(res search.PackageSearchResults) (string, error) {
 	if err := res.EnsureOneSelected(); err != nil {
 		return "", err
 	}

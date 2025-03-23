@@ -15,21 +15,6 @@ func (a *InitArgs) Run() error {
 		f.Flake.OverrideInput("ntv", a.NVFlake)
 	}
 
-	err := a.addPackages(f)
-	if err != nil {
-		return err
-	}
-
-	code, err := f.Render()
-	if err != nil {
-		return err
-	}
-	fmt.Println(code)
-
-	return nil
-}
-
-func (a *InitArgs) addPackages(f *flake.Context) error {
 	specs, err := search_spec.ParseSearchSpecs(a.rest, a.LazamarChannel)
 	if err != nil {
 		return err
@@ -39,16 +24,27 @@ func (a *InitArgs) addPackages(f *flake.Context) error {
 	if err != nil {
 		return err
 	}
-	if err = res.EnsureOneSelected(); err != nil {
+
+	code, err := FlakeCode(f, res)
+	if err != nil {
 		return err
 	}
-	if err = res.EnsureUniquePackageNames(); err != nil {
-		return err
+
+	fmt.Println(code)
+	return nil
+}
+
+func FlakeCode(f *flake.Context, res search.PackageSearchResults) (string, error) {
+	if err := res.EnsureOneSelected(); err != nil {
+		return "", err
+	}
+	if err := res.EnsureUniquePackageNames(); err != nil {
+		return "", err
 	}
 
 	for _, r := range res {
 		f.AddTool(r)
 	}
 
-	return nil
+	return f.Render()
 }
