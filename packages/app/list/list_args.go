@@ -47,7 +47,7 @@ type ListArgs struct {
 //go:embed HELP
 var HELP string
 
-func HelpAndExit(name string) {
+func HelpAndExit(name string, exitCode int) {
 	t, err := template.New("HELP").Parse(HELP)
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +60,7 @@ func HelpAndExit(name string) {
 		log.Fatal(err)
 		os.Exit(1)
 	}
-	os.Exit(0)
+	os.Exit(exitCode)
 }
 
 func NewListArgs() *ListArgs {
@@ -70,7 +70,7 @@ func NewListArgs() *ListArgs {
 		Color:   isatty.IsTerminal(os.Stdout.Fd()),
 	}
 	args.OnHelp = func() {
-		HelpAndExit("nix-versions")
+		HelpAndExit("nix-versions", 0)
 	}
 	args.OnJSON = func() {
 		args.OutFmt = OutJSON

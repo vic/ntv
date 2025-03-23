@@ -94,7 +94,10 @@ func (a *AppArgs) ParseAndRun(args []string) error {
 	}
 
 	if cmd == "list" {
-		list.HelpAndExit("nvm list")
+		if a.Help {
+
+			list.HelpAndExit("nvm list", 1)
+		}
 		return list.NewListArgs().ParseAndRun(extra[1:])
 	}
 
