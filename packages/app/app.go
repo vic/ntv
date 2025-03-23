@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/vic/ntv/packages/app/list"
 	"github.com/vic/ntv/packages/app/new"
 )
 
@@ -63,9 +64,9 @@ func (cliArgs *AppArgs) ParseAndRun(args []string) error {
 		return new.NewInitArgs().ParseAndRun(extra[1:])
 	}
 
-	// if cmd == "list" || cmd == "search" {
-	// 	return NewSearchArgs().ParseAndRun(extra[1:])
-	// }
+	if cmd == "list" {
+		return list.NewListArgs().ParseAndRun(extra[1:])
+	}
 
 	// // Default action is search.
 	// return NewSearchArgs().ParseAndRun(extra)

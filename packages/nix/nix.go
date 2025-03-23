@@ -105,7 +105,7 @@ type PackageVersion struct {
 }
 
 func InstallablePackageVersion(installable string) (*PackageVersion, error) {
-	out, err := NixRun("eval", "--json", installable, "--apply", "p: { version = p.version; name = builtins.replaceStrings [(\"-\" + p.version)] [\"\"] (p.pname or p.name); }")
+	out, err := NixRun("eval", "--json", installable, "--apply", "p: let version = if p ? version then p.version else throw \""+installable+" is NOT an installable.\"; name = builtins.replaceStrings [(\"-\" + version)] [\"\"] (p.pname or p.name); in {  inherit name version;  }")
 	if err != nil {
 		return nil, err
 	}

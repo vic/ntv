@@ -21,7 +21,7 @@ type Version struct {
 	Revision  string `json:"revision"`
 }
 
-type ByVersion []Version
+type ByVersion []*Version
 
 func (a ByVersion) Len() int      { return len(a) }
 func (a ByVersion) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
@@ -37,11 +37,11 @@ func (a ByVersion) Less(i, j int) bool {
 	return x.LessThan(y)
 }
 
-func SortByVersion(versions []Version) {
+func SortByVersion(versions []*Version) {
 	sort.Sort(ByVersion(versions))
 }
 
-func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
+func ConstraintBy(versions []*Version, constraint string) ([]*Version, error) {
 	constraint = strings.Replace(constraint, "latest", "", 1)
 	if strings.TrimSpace(constraint) == "" {
 		constraint = "*"
@@ -50,7 +50,7 @@ func ConstraintBy(versions []Version, constraint string) ([]Version, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create constraint from string `%s`:\n%v\nSee https://github.com/Masterminds/semver?tab=readme-ov-file#basic-comparisons", constraint, err)
 	}
-	var res []Version
+	var res []*Version
 	for _, ver := range versions {
 		v, err := semver.NewVersion(ver.Version)
 		if err != nil {

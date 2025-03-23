@@ -5,12 +5,24 @@ import (
 )
 
 type InitArgs struct {
-	NVFlake string `long:"override-nv"`
-	rest    []string
+	OnNixHub       func()  `long:"nixhub" short:"n"`
+	OnLazamar      func()  `long:"lazamar" short:"l"`
+	LazamarChannel *string `long:"channel" short:"c"`
+	NVFlake        string  `long:"override-nv"`
+	rest           []string
 }
 
 func NewInitArgs() *InitArgs {
 	args := InitArgs{}
+	args.OnNixHub = func() {
+		args.LazamarChannel = nil
+	}
+	args.OnLazamar = func() {
+		if args.LazamarChannel == nil {
+			channel := "nixpkgs-unstable"
+			args.LazamarChannel = &channel
+		}
+	}
 	return &args
 }
 

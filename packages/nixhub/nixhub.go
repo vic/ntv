@@ -23,10 +23,10 @@ type response struct {
 	Releases []release `json:"releases"`
 }
 
-func Search(name string) ([]lib.Version, error) {
+func Search(name string) ([]*lib.Version, error) {
 	var (
 		body   response
-		result []lib.Version
+		result []*lib.Version
 	)
 	err := requests.
 		URL("https://search.devbox.sh/v2/pkg").
@@ -47,7 +47,7 @@ func Search(name string) ([]lib.Version, error) {
 			Revision:  platform.CommitHash,
 			Flake:     "nixpkgs",
 		}
-		result = append(result, version)
+		result = append(result, &version)
 	}
 	return result, nil
 }

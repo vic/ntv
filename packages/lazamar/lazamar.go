@@ -11,13 +11,13 @@ import (
 	lib "github.com/vic/ntv/packages/versions"
 )
 
-func Search(name string, channel string) ([]lib.Version, error) {
+func Search(name string, channel string) ([]*lib.Version, error) {
 	var (
 		body   string
-		result []lib.Version
+		result []*lib.Version
 	)
 	err := requests.
-		URL("https://lazamar.co.uk/ntv/").
+		URL("https://lazamar.co.uk/nix-versions/").
 		Param("channel", channel).
 		Param("package", name).
 		ToString(&body).
@@ -46,7 +46,7 @@ func Search(name string, channel string) ([]lib.Version, error) {
 			Revision:  query.Get("revision"),
 			Flake:     "nixpkgs",
 		}
-		result = append(result, version)
+		result = append(result, &version)
 	}
 
 	return result, nil

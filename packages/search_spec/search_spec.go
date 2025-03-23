@@ -35,13 +35,13 @@ type PackageSearchSpec struct {
 	VersionsBackend   *VersionsBackend
 }
 
-func ParseSearchSpecs(args []string) (PackageSearchSpecs, error) {
+func ParseSearchSpecs(args []string, defaultToLazamarChannel *string) (PackageSearchSpecs, error) {
 	group, _ := errgroup.WithContext(context.Background())
 	specs := make(PackageSearchSpecs, len(args))
 	for i, pkg := range args {
 		i, pkg := i, pkg
 		group.Go(func() error {
-			s, err := newPackageSearchSpec(pkg)
+			s, err := newPackageSearchSpec(pkg, defaultToLazamarChannel)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func (s *PackageSearchSpec) HasBackend() bool {
 			s.VersionsBackend.FlakeInstallable != nil)
 }
 
-func newPackageSearchSpec(spec string) (*PackageSearchSpec, error) {
+func newPackageSearchSpec(spec string, defaultToLazamarChannel *string) (*PackageSearchSpec, error) {
 	original_spec := strings.Clone(spec)
 	s := &PackageSearchSpec{
 		Spec:  &original_spec,
@@ -103,6 +103,9 @@ func newPackageSearchSpec(spec string) (*PackageSearchSpec, error) {
 		str := strings.TrimPrefix(*s.Query, "lazamar:")
 		s.Query = &str
 		var channel = "nixpkgs-unstable"
+		if defaultToLazamarChannel != nil {
+			channel = *defaultToLazamarChannel
+		}
 		if strings.Contains(*s.Query, ":") {
 			parts := strings.SplitN(*s.Query, ":", 2)
 			channel = parts[0]
@@ -133,7 +136,12 @@ func newPackageSearchSpec(spec string) (*PackageSearchSpec, error) {
 
 	if !s.HasBackend() {
 		if simpleAttrRegex.MatchString(*s.Query) {
-			s.VersionsBackend = &VersionsBackend{NixHub: &Unit{}}
+			if defaultToLazamarChannel == nil {
+				s.VersionsBackend = &VersionsBackend{NixHub: &Unit{}}
+			} else {
+				channel := *defaultToLazamarChannel
+				s.VersionsBackend = &VersionsBackend{LazamarChannel: (*LazamarChannel)(&channel)}
+			}
 		} else {
 			installable := *s.Query
 			s.VersionsBackend = &VersionsBackend{FlakeInstallable: (*FlakeInstallable)(&installable)}

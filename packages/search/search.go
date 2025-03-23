@@ -18,9 +18,10 @@ type PackageSearchSpecs ss.PackageSearchSpecs
 type PackageSearchSpec ss.PackageSearchSpec
 
 type PackageSearchResult struct {
-	FromSearch *PackageSearchSpec
-	Versions   *[]lib.Version
-	Selected   *lib.Version
+	FromSearch  *PackageSearchSpec
+	Versions    []*lib.Version
+	Constrained []*lib.Version
+	Selected    *lib.Version
 }
 
 type PackageSearchResults []*PackageSearchResult
@@ -28,7 +29,7 @@ type PackageSearchResults []*PackageSearchResult
 func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 	var (
 		result   *PackageSearchResult
-		versions []lib.Version
+		versions []*lib.Version
 		err      error
 	)
 
@@ -45,11 +46,7 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 			Flake:     "nixpkgs",
 			Revision:  "",
 		}
-		result := PackageSearchResult{
-			FromSearch: s,
-			Versions:   &[]lib.Version{one},
-		}
-		return &result, nil
+		versions = []*lib.Version{&one}
 	}
 
 	if s.VersionsBackend.FlakeInstallable != nil {
@@ -67,13 +64,14 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 			flake = installable[:idx]
 			attribute = installable[idx+1:]
 		}
-		versions = []lib.Version{{
+		one := lib.Version{
 			Name:      pv.PackageName,
 			Version:   pv.Version,
 			Attribute: attribute,
 			Flake:     flake,
 			Revision:  "",
-		}}
+		}
+		versions = []*lib.Version{&one}
 	}
 
 	if s.VersionsBackend.NixHub != nil {
@@ -88,18 +86,25 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 		}
 	}
 
+	lib.SortByVersion(versions)
+
+	result = &PackageSearchResult{
+		FromSearch:  s,
+		Versions:    versions,
+		Constrained: []*lib.Version{},
+	}
+
 	if s.VersionConstraint != nil {
-		versions, err = lib.ConstraintBy(versions, *s.VersionConstraint)
+		result.Constrained, err = lib.ConstraintBy(versions, *s.VersionConstraint)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	lib.SortByVersion(versions)
-
-	result = &PackageSearchResult{
-		FromSearch: s,
-		Versions:   &versions,
+	if len(result.Constrained) > 0 {
+		result.Selected = result.Constrained[len(result.Constrained)-1]
+	} else if len(versions) > 0 {
+		result.Selected = versions[len(versions)-1]
 	}
 
 	return result, nil
@@ -125,12 +130,11 @@ func (ss PackageSearchSpecs) Search() (PackageSearchResults, error) {
 	return results, nil
 }
 
-func (r PackageSearchResults) SelectLatest() error {
+func (r PackageSearchResults) EnsureOneSelected() error {
 	for _, result := range r {
-		if len(*result.Versions) == 0 {
+		if result.Selected == nil {
 			return fmt.Errorf("no versions found for %s", *result.FromSearch.Spec)
 		}
-		result.Selected = &(*result.Versions)[len(*result.Versions)-1]
 	}
 	return nil
 }
@@ -148,6 +152,14 @@ func (r PackageSearchResults) EnsureUniquePackageNames() error {
 		return fmt.Errorf("expected at most one version per package, but got %v - try using @latest or a more specific version constraint", seen)
 	}
 	return nil
+}
+
+func (r PackageSearchResults) Size() int {
+	var size = 0
+	for _, result := range r {
+		size += len(result.Versions)
+	}
+	return size
 }
 
 func (r PackageSearchResult) FlakeUrl() string {

@@ -31,7 +31,7 @@ func (a *InitArgs) Run() error {
 }
 
 func (a *InitArgs) addPackages(f *flake.Context) error {
-	specs, err := search_spec.ParseSearchSpecs(a.rest)
+	specs, err := search_spec.ParseSearchSpecs(a.rest, a.LazamarChannel)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (a *InitArgs) addPackages(f *flake.Context) error {
 		}
 		return err
 	}
-	if err = res.SelectLatest(); err != nil {
+	if err = res.EnsureOneSelected(); err != nil {
 		return err
 	}
 	if err = res.EnsureUniquePackageNames(); err != nil {
