@@ -2,6 +2,7 @@ package list
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"slices"
@@ -9,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
 
+	"github.com/vic/ntv/packages/flake"
 	"github.com/vic/ntv/packages/search"
 	"github.com/vic/ntv/packages/search_spec"
 )
@@ -33,14 +35,28 @@ func (a *ListArgs) Run() error {
 
 	var out string
 	if a.OutFmt == OutText {
-		out, err = a.Text(res)
+		out, err = a.TextOut(res)
 		if err != nil {
 			return err
 		}
 	}
 
 	if a.OutFmt == OutInstallable {
-		out, err = a.Installable(res)
+		out, err = a.InstallableOut(res)
+		if err != nil {
+			return err
+		}
+	}
+
+	if a.OutFmt == OutJSON {
+		out, err = a.JsonOut(res)
+		if err != nil {
+			return err
+		}
+	}
+
+	if a.OutFmt == OutFlake {
+		out, err = a.FlakeOut(res)
 		if err != nil {
 			return err
 		}
@@ -50,7 +66,45 @@ func (a *ListArgs) Run() error {
 	return nil
 }
 
-func (a *ListArgs) Installable(res search.PackageSearchResults) (string, error) {
+func (a *ListArgs) FlakeOut(res search.PackageSearchResults) (string, error) {
+	if err := res.EnsureOneSelected(); err != nil {
+		return "", err
+	}
+	if err := res.EnsureUniquePackageNames(); err != nil {
+		return "", err
+	}
+
+	f := flake.New()
+	for _, r := range res {
+		f.AddTool(r)
+	}
+
+	return f.Render()
+}
+
+func (a *ListArgs) JsonOut(res search.PackageSearchResults) (string, error) {
+	if err := res.EnsureOneSelected(); err != nil {
+		return "", err
+	}
+	if err := res.EnsureUniquePackageNames(); err != nil {
+		return "", err
+	}
+
+	var tools = make([]flake.Tool, 0)
+
+	for _, r := range res {
+		tools = append(tools, flake.AsTool(r))
+	}
+
+	jsonBytes, err := json.MarshalIndent(&tools, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonBytes), nil
+}
+
+func (a *ListArgs) InstallableOut(res search.PackageSearchResults) (string, error) {
 	if err := res.EnsureOneSelected(); err != nil {
 		return "", err
 	}
@@ -65,7 +119,7 @@ func (a *ListArgs) Installable(res search.PackageSearchResults) (string, error) 
 	return buff.String(), nil
 }
 
-func (a *ListArgs) Text(res search.PackageSearchResults) (string, error) {
+func (a *ListArgs) TextOut(res search.PackageSearchResults) (string, error) {
 	color.NoColor = !a.Color
 
 	nocolor := color.New(color.FgWhite)

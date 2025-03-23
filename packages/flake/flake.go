@@ -100,14 +100,18 @@ func (f *Flake) AddImport(importPath string) {
 	f.Imports = append(f.Imports, importPath)
 }
 
-func (c *Context) AddTool(r *search.PackageSearchResult) {
-
-	c.Tools[r.Selected.Name] = Tool{
+func AsTool(r *search.PackageSearchResult) Tool {
+	return Tool{
 		Spec:        *r.FromSearch.Spec,
 		Name:        r.Selected.Name,
 		Version:     r.Selected.Version,
 		Installable: r.Installable(),
 	}
+}
+
+func (c *Context) AddTool(r *search.PackageSearchResult) {
+
+	c.Tools[r.Selected.Name] = AsTool(r)
 
 	if r.FromSearch.VersionsBackend.CurrentNixpkgs == nil {
 		c.Flake.AddInput(r.Selected.Name, r.FlakeUrl(), true, []Follow{})
