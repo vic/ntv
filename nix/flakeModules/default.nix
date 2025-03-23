@@ -1,11 +1,11 @@
 {inputs, ...}: {
 
   imports = [
-    ./nix-versions.nix
+    ./ntv.nix
   ];
 
   perSystem = ({inputs', ...}: {
-    packages.nvs = inputs'.nix-versions.packages.default;
+    packages.nvs = inputs'.ntv.packages.default;
   });
 
 }

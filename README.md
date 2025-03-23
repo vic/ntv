@@ -1,10 +1,10 @@
-# nix-versions - Search nix packages versions.
+# ntv - Search nix packages versions.
 
 This CLI utility helps you find the versions of nix packages that were available in a particular nixpkgs revision.
 
 It uses the following backends for searching nixpkgs revisions:
 
-- [lazamar/nix-versions](https://lazamar.co.uk/nix-versions/)
+- [lazamar/ntv](https://lazamar.co.uk/ntv/)
 - [nixhub](https://nixhub.io)
 
 It can search for packages by attribute-path, or by fuzzy searching [search.nixos.org](https://search.nixos.org) by name/description or by the executable programs they provide.
@@ -20,14 +20,14 @@ This is possible thanks to [nix-search-cli](https://github.com/peterldowns/nix-s
 Install with nix
 
 ```shell
-> nix profile install github:vic/nix-versions
-> nix-versions --help
+> nix profile install github:vic/ntv
+> ntv --help
 ```
 
 Or use directly from github
 
 ```shell
-> nix run github:vic/nix-versions -- --help
+> nix run github:vic/ntv -- --help
 ```
 
 </details>
@@ -41,22 +41,22 @@ Or use directly from github
 
 ```shell
 # Show known versions of emacs on Lazamar-index (including emacs-nox, emacs-gtk, etc)
-> nix-versions --lazamar emacs
+> ntv --lazamar emacs
 
 
 # don't include packages with other attribute names like, emacs-nox, emacs-gtk, etc.
-> nix-versions --lazamar --exact emacs
+> ntv --lazamar --exact emacs
 
 
 # Latest versions of packages providing `pwd`.
 # --exact means that packages must provide an executable named exactly `pwd`.
-> nix-versions --exact bin/pwd@latest
+> ntv --exact bin/pwd@latest
 
 
 # Latest versions of packages providing some executable programs.
 #   packages providing `emacsclient`. (eg. emacs-nox, emacs-gtk, emacs)
 #   packages providing `pip`. (eg. python312Packages.pip, python313Packages.pip)
-> nix-versions --exact bin/pip@latest bin/emacsclient@'>27 <29 latest'
+> ntv --exact bin/pip@latest bin/emacsclient@'>27 <29 latest'
 Version  Attribute              Nixpkgs-Revision
 24.0     python313Packages.pip  2d068ae5c6516b2d04562de50a58c682540de9bf
 24.0     python312Packages.pip  2d068ae5c6516b2d04562de50a58c682540de9bf
@@ -66,7 +66,7 @@ Version  Attribute              Nixpkgs-Revision
 
 
 # Any package having an executable program that contains `rust` on its name
-> nix-versions --exact=false bin/rust@latest
+> ntv --exact=false bin/rust@latest
 Version  Attribute                        Nixpkgs-Revision
 0.1.1    rustycli                         2d068ae5c6516b2d04562de50a58c682540de9bf
 0.5.0    rusty-man                        2d068ae5c6516b2d04562de50a58c682540de9bf
@@ -81,7 +81,7 @@ Version  Attribute                        Nixpkgs-Revision
 
 
 # Packages matching the `netscape` query on search.nixos.org
-> nix-versions '~netscape'@latest
+> ntv '~netscape'@latest
 Version  Attribute         Nixpkgs-Revision
 0.1.3    netsurf.libnslog  0d534853a55b5d02a4ababa1d71921ce8f0aee4c
 0.1.6    netsurf.libnspsl  2d068ae5c6516b2d04562de50a58c682540de9bf
@@ -96,39 +96,39 @@ Version  Attribute         Nixpkgs-Revision
 
 
 # Return only the most recent version
-> nix-versions --limit 1 emacs
+> ntv --limit 1 emacs
 
 
 # Only versions between 25 and 27. Output JSON
 # same as 'emacs@>= 25 <= 27'
-> nix-versions --constraint '>= 25 <= 27' --json emacs
+> ntv --constraint '>= 25 <= 27' --json emacs
 
 
 # Latest of 29 series.
 # same as 'emacs@latest~29'
-> nix-versions --constraint '~29' --limit 1 emacs
+> ntv --constraint '~29' --limit 1 emacs
 
 
 # Do not include emacs-nox and emacs-gtk
-> nix-versions --exact emacs
+> ntv --exact emacs
 
 
 # Show versions of pip from nixhub.io in the order that nixhub returns them
-> nix-versions --nixhub --sort=false python312Packages.pip
+> ntv --nixhub --sort=false python312Packages.pip
 
 
 # Use release channel `nixpkgs/nixos-24.05` (using lazamar search)
-> nix-versions --channel nixos-24.05 python312Packages.pip
+> ntv --channel nixos-24.05 python312Packages.pip
 
 
 # NixHub.io has rate-limits but will likely have indexed more recent versions.
 # https://www.jetify.com/docs/nixhub/#rate-limits
-> nix-versions --nixhub bun@latest
+> ntv --nixhub bun@latest
 1.2.5    bun        573c650e8a14b2faa0041645ab18aed7e60f0c9a
 
 
-# https://lazamar.co.uk/nix-versions/ has no rate-limit, we scrap the webpage.
-> nix-versions --lazamar bun@latest
+# https://lazamar.co.uk/ntv/ has no rate-limit, we scrap the webpage.
+> ntv --lazamar bun@latest
 1.1.43   bun        21808d22b1cda1898b71cf1a1beb524a97add2c4
 ```
 
@@ -137,15 +137,15 @@ Version  Attribute         Nixpkgs-Revision
 <details>
 <summary>
 
-###### `nix-versions --help`
+###### `ntv --help`
 
 </summary>
 
 ```
-nix-versions - show available nix packages versions
+ntv - show available nix packages versions
 
 USAGE:
-   nix-versions [options] PKG_ATTRIBUTE_NAME...
+   ntv [options] PKG_ATTRIBUTE_NAME...
 
 PKG_ATTRIBUTE_NAME:
    A package attribute name like `emacs` or `python312Packages.pip`.
@@ -199,11 +199,11 @@ OPTIONS:
    NIX VERSIONS BACKEND
 
    --channel value      Nixpkgs channel for lazamar backend. Enables lazamar when set. (default: "nixpkgs-unstable")
-   --lazamar            Use https://lazamar.co.uk/nix-versions as backend (default: false)
+   --lazamar            Use https://lazamar.co.uk/ntv as backend (default: false)
    --nixhub             Use https://www.nixhub.io/ as backend (default: true)
 
 Made with <3 by vic [https://x.com/oeiuwq].
-See https://github.com/vic/nix-versions for examples and reporting issues.
+See https://github.com/vic/ntv for examples and reporting issues.
 ```
 
 </details>

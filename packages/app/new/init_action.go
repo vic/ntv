@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/vic/nix-versions/packages/flake"
-	"github.com/vic/nix-versions/packages/search"
-	"github.com/vic/nix-versions/packages/search_spec"
+	"github.com/vic/ntv/packages/flake"
+	"github.com/vic/ntv/packages/search"
+	"github.com/vic/ntv/packages/search_spec"
 )
 
 func (a *InitArgs) Run() error {
 	f := flake.New()
 
 	if a.NVFlake != "" {
-		f.Flake.OverrideInput("nix-versions", a.NVFlake)
+		f.Flake.OverrideInput("ntv", a.NVFlake)
 	}
 
 	err := a.addPackages(f)

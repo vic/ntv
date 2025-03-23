@@ -1,4 +1,4 @@
-{ inputs, nix-versions, ... }:
+{ inputs, ntv, ... }:
 let
 
   nv-packages-set =
@@ -16,7 +16,7 @@ let
           attr = lib.setAttrByPath name-path pkg;
         in
         attr;
-      attrs = lib.map toAttr nix-versions;
+      attrs = lib.map toAttr ntv;
       packages = lib.foldl lib.recursiveUpdate { } attrs;
     in
     packages;
@@ -26,7 +26,7 @@ let
     let
       inherit (pkgs) lib;
       set = nv-packages-set pkgs;
-      list = lib.map (nv: lib.getAttrFromPath (lib.splitString "." nv.name) set) nix-versions;
+      list = lib.map (nv: lib.getAttrFromPath (lib.splitString "." nv.name) set) ntv;
     in
     list;
 
@@ -35,7 +35,7 @@ let
   packagesEnv =
     pkgs:
     pkgs.buildEnv {
-      name = "nix-versions";
+      name = "ntv";
       paths = nv-packages-list pkgs;
     };
 
@@ -47,7 +47,7 @@ let
 
 in
 {
-  flake.lib.nix-versions = nix-versions;
+  flake.lib.ntv = ntv;
   flake.overlays.default = overlay;
 
   perSystem = (

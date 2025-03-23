@@ -93,7 +93,7 @@ func NixfmtCode(code string) (string, error) {
 }
 
 func NvJSON(flakePath string) (string, error) {
-	return NixRun("eval", "--json", (flakePath + "#lib.nix-versions"))
+	return NixRun("eval", "--json", (flakePath + "#lib.ntv"))
 }
 
 type PackageVersion struct {

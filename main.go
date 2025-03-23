@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/vic/nix-versions/packages/app"
+	"github.com/vic/ntv/packages/app"
 )
 
 func main() {

@@ -3,28 +3,24 @@
     { pkgs, ... }:
     let
 
-      nix-versions = pkgs.buildGoModule {
-        pname = "nix-versions";
+      ntv = pkgs.buildGoModule {
+        pname = "ntv";
         src = ./..;
         version = pkgs.lib.trim (builtins.readFile ./../packages/app/VERSION);
-        vendorHash = "sha256-KZSWUaiG0hhhL13GxIue4CzWACmzFK96fAZqejAihqU=";
+        vendorHash = "sha256-Vj+LUF7k0KlPv1uhSIfGU6i1CMBz3+llL/UK1G9FaZw=";
         meta = with pkgs.lib; {
-          description = "CLI for searching nix packages versions using lazamar or nixhub, written in Go";
-          homepage = "https://github.com/vic/nix-versions";
-          mainProgram = "nix-versions";
+          description = "Nix Tool Versions";
+          homepage = "https://github.com/vic/ntv";
+          mainProgram = "ntv";
         };
-        postBuild = ''
-        (cd $GOPATH/bin; ln -sfn nix-versions nvs)
-        '';
       };
 
     in
     {
 
       packages = {
-        default = nix-versions;
-        nvs = nix-versions;
-        inherit nix-versions;
+        default = ntv;
+        inherit ntv;
       };
 
     };

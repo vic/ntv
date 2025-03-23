@@ -10,14 +10,14 @@ devenv.local.nix
 .pre-commit-config.yaml
 
 # executable
-nix-versions
+ntv
 result
 
 # go
 vendor
-nix-versions
+ntv
 REVISION
 
-.nix-versions
+.ntv
 foo
 chale

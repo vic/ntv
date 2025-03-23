@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/carlmjohnson/requests"
-	lib "github.com/vic/nix-versions/packages/versions"
+	lib "github.com/vic/ntv/packages/versions"
 )
 
 type platform struct {

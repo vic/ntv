@@ -1,11 +1,11 @@
 { lib, config, ... }:
 {
-  options.nix-versions.flake =
+  options.ntv.flake =
     with lib;
     with types;
     mkOption {
       type = unspecified;
     };
 
-  config.flake.lib.nix-versions.flake = config.nix-versions.flake;
+  config.flake.lib.ntv.flake = config.ntv.flake;
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/antchfx/htmlquery"
 	"github.com/carlmjohnson/requests"
-	lib "github.com/vic/nix-versions/packages/versions"
+	lib "github.com/vic/ntv/packages/versions"
 )
 
 func Search(name string, channel string) ([]lib.Version, error) {
@@ -17,7 +17,7 @@ func Search(name string, channel string) ([]lib.Version, error) {
 		result []lib.Version
 	)
 	err := requests.
-		URL("https://lazamar.co.uk/nix-versions/").
+		URL("https://lazamar.co.uk/ntv/").
 		Param("channel", channel).
 		Param("package", name).
 		ToString(&body).

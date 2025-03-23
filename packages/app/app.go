@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/vic/nix-versions/packages/app/new"
+	"github.com/vic/ntv/packages/app/new"
 )
 
 //go:embed APP_HELP

@@ -7,11 +7,11 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/vic/nix-versions/packages/lazamar"
-	"github.com/vic/nix-versions/packages/nix"
-	"github.com/vic/nix-versions/packages/nixhub"
-	ss "github.com/vic/nix-versions/packages/search_spec"
-	lib "github.com/vic/nix-versions/packages/versions"
+	"github.com/vic/ntv/packages/lazamar"
+	"github.com/vic/ntv/packages/nix"
+	"github.com/vic/ntv/packages/nixhub"
+	ss "github.com/vic/ntv/packages/search_spec"
+	lib "github.com/vic/ntv/packages/versions"
 )
 
 type PackageSearchSpecs ss.PackageSearchSpecs
