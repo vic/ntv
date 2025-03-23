@@ -85,7 +85,10 @@ func NixfmtCode(code string) (string, error) {
 		return "", err
 	}
 
-	Nixfmt(tmpFile.Name())
+	err = Nixfmt(tmpFile.Name())
+	if err != nil {
+		return "", err
+	}
 
 	res, err := os.ReadFile(tmpFile.Name())
 
