@@ -1,4 +1,4 @@
-package app
+package new
 
 import (
 	"github.com/jessevdk/go-flags"

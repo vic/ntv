@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/vic/nix-versions/packages/app/new"
 )
 
 //go:embed APP_HELP
@@ -59,13 +60,14 @@ func (cliArgs *AppArgs) ParseAndRun(args []string) error {
 	}
 
 	if cmd == "new" || cmd == "init" {
-		return NewInitArgs().ParseAndRun(extra[1:])
+		return new.NewInitArgs().ParseAndRun(extra[1:])
 	}
 
-	if cmd == "list" || cmd == "search" {
-		return NewSearchArgs().ParseAndRun(extra[1:])
-	}
+	// if cmd == "list" || cmd == "search" {
+	// 	return NewSearchArgs().ParseAndRun(extra[1:])
+	// }
 
-	// Default action is search.
-	return NewSearchArgs().ParseAndRun(extra)
+	// // Default action is search.
+	// return NewSearchArgs().ParseAndRun(extra)
+	return nil
 }
