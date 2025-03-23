@@ -2,7 +2,6 @@ package new
 
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/vic/ntv/packages/flake"
 	"github.com/vic/ntv/packages/search"
@@ -38,9 +37,6 @@ func (a *InitArgs) addPackages(f *flake.Context) error {
 
 	res, err := search.PackageSearchSpecs(specs).Search()
 	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("%v: %s", err, string(ee.Stderr))
-		}
 		return err
 	}
 	if err = res.EnsureOneSelected(); err != nil {

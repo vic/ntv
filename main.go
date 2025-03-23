@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/vic/ntv/packages/app"
 )
@@ -15,6 +16,10 @@ func main() {
 	}
 	err := app.NewAppArgs().ParseAndRun(os.Args[1:])
 	if err != nil {
+		if ee, ok := err.(*exec.ExitError); ok {
+			log.Fatal(string(ee.Stderr))
+			os.Exit(ee.ExitCode())
+		}
 		log.Fatal(err)
 		os.Exit(2)
 	}
