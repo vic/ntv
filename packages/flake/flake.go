@@ -102,21 +102,15 @@ func (f *Flake) AddImport(importPath string) {
 
 func (c *Context) AddTool(r *search.PackageSearchResult) {
 
-	var url = r.Selected.Flake
-	if len(r.Selected.Revision) > 0 {
-		url = fmt.Sprintf("%s/%s", r.Selected.Flake, r.Selected.Revision)
-	}
-	installable := fmt.Sprintf("%s#%s", url, r.Selected.Attribute)
-
 	c.Tools[r.Selected.Name] = Tool{
 		Spec:        *r.FromSearch.Spec,
 		Name:        r.Selected.Name,
 		Version:     r.Selected.Version,
-		Installable: installable,
+		Installable: r.Installable(),
 	}
 
 	if r.FromSearch.VersionsBackend.CurrentNixpkgs == nil {
-		c.Flake.AddInput(r.Selected.Name, url, true, []Follow{})
+		c.Flake.AddInput(r.Selected.Name, r.FlakeUrl(), true, []Follow{})
 	}
 }
 

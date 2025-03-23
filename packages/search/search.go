@@ -153,6 +153,18 @@ func (r PackageSearchResults) EnsureUniquePackageNames() error {
 	return nil
 }
 
+func (r PackageSearchResult) FlakeUrl() string {
+	var url = r.Selected.Flake
+	if len(r.Selected.Revision) > 0 {
+		url = fmt.Sprintf("%s/%s", r.Selected.Flake, r.Selected.Revision)
+	}
+	return url
+}
+
+func (r PackageSearchResult) Installable() string {
+	return fmt.Sprintf("%s#%s", r.FlakeUrl(), r.Selected.Attribute)
+}
+
 // ---- WILL REMOVE FROM HERE ----
 
 type Opts struct {
