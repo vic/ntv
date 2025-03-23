@@ -1,6 +1,9 @@
 package list
 
 import (
+	_ "embed"
+	"html/template"
+	"log"
 	"os"
 
 	"github.com/jessevdk/go-flags"
@@ -25,6 +28,7 @@ const (
 )
 
 type ListArgs struct {
+	OnHelp         func() `long:"help" short:"h"`
 	OnJSON         func() `long:"json" short:"j"`
 	OnText         func() `long:"text" short:"t"`
 	OnInstallable  func() `long:"installable" short:"i"`
@@ -40,11 +44,33 @@ type ListArgs struct {
 	rest           []string
 }
 
+//go:embed HELP
+var HELP string
+
+func HelpAndExit(name string) {
+	t, err := template.New("HELP").Parse(HELP)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	err = t.Execute(os.Stdout, map[string]interface{}{
+		"Cmd": name,
+	})
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	os.Exit(0)
+}
+
 func NewListArgs() *ListArgs {
 	args := ListArgs{
 		OutFmt:  OutText,
 		ShowOpt: ShowConstrained,
 		Color:   isatty.IsTerminal(os.Stdout.Fd()),
+	}
+	args.OnHelp = func() {
+		HelpAndExit("nix-versions")
 	}
 	args.OnJSON = func() {
 		args.OutFmt = OutJSON

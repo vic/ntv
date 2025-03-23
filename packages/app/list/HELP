@@ -1,0 +1,25 @@
+NAME
+    {{.Cmd}} - List package versions.
+
+SYNOPSIS
+
+    {{.Cmd}} [<options>] <spec>...
+    
+DESCRIPTION
+
+    List available package versions.
+
+OPTIONS
+
+    --help  -h      Print this help and exit.
+
+  OUTPUT FORMAT
+
+    --json  -j      Print JSON.
+
+
+NTV
+
+    Part of the NTV suite.
+    Made with love by [vic](https://x.com/oeiwuq)
+    Report [issues](https://github.com/vic/ntv)
