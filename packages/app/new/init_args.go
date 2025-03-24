@@ -1,15 +1,30 @@
 package new
 
 import (
+	_ "embed"
+
 	"github.com/jessevdk/go-flags"
+	"github.com/vic/ntv/packages/app/help"
 )
 
 type InitArgs struct {
 	OnNixHub       func()  `long:"nixhub" short:"n"`
 	OnLazamar      func()  `long:"lazamar" short:"l"`
 	LazamarChannel *string `long:"channel" short:"c"`
-	NVFlake        string  `long:"override-nv"`
+	NtvFlake       string  `long:"override-ntv"`
 	rest           []string
+}
+
+//go:embed HELP
+var HELP string
+
+var Help = help.CmdHelp{
+	HelpTxt: HELP,
+	HelpCtx: func(name string) any {
+		return map[string]interface{}{
+			"Cmd": name,
+		}
+	},
 }
 
 func NewInitArgs() *InitArgs {

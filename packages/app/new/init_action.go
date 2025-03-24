@@ -11,8 +11,8 @@ import (
 func (a *InitArgs) Run() error {
 	f := flake.New()
 
-	if a.NVFlake != "" {
-		f.Flake.OverrideInput("ntv", a.NVFlake)
+	if a.NtvFlake != "" {
+		f.Flake.OverrideInput("ntv", a.NtvFlake)
 	}
 
 	specs, err := search_spec.ParseSearchSpecs(a.rest, a.LazamarChannel)

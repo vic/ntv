@@ -1,1 +1,14 @@
-{{.Cmd}}  {{.Version}}
+NAME
+
+   {{.Cmd}}
+
+SYNOPSYS
+
+   {{.Cmd}} COMMAND [command-options]
+
+COMMANDS
+
+   init      - Create a new Nix Flake
+   list      - List Nix package versions
+
+VERSION {{.Version}}

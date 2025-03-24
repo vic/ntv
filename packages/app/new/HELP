@@ -1,0 +1,12 @@
+SYNOPSYS
+
+   {{.Cmd}} [options]
+
+OPTIONS
+
+   --nixhub  -n     Use NixHub as default versions search backend.
+   --lazamar -l     Use Lazamar as default versions search bakend.
+   --channel -c     Use Lazamar channel (enables Lazamar when set)
+
+
+   --override-ntv URL    Override inputs.ntv.url on generated flake.

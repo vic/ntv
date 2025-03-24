@@ -2,12 +2,11 @@ package list
 
 import (
 	_ "embed"
-	"html/template"
-	"log"
 	"os"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/mattn/go-isatty"
+	"github.com/vic/ntv/packages/app/help"
 )
 
 type OutFmt uint8
@@ -28,7 +27,6 @@ const (
 )
 
 type ListArgs struct {
-	OnHelp         func()       `long:"help" short:"h"`
 	OnJSON         func()       `long:"json" short:"j"`
 	OnText         func()       `long:"text" short:"t"`
 	OnInstallable  func()       `long:"installable" short:"i"`
@@ -49,20 +47,13 @@ type ListArgs struct {
 //go:embed HELP
 var HELP string
 
-func HelpAndExit(name string, exitCode int) {
-	t, err := template.New("HELP").Parse(HELP)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-	err = t.Execute(os.Stdout, map[string]interface{}{
-		"Cmd": name,
-	})
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-	os.Exit(exitCode)
+var Help = help.CmdHelp{
+	HelpTxt: HELP,
+	HelpCtx: func(name string) any {
+		return map[string]interface{}{
+			"Cmd": name,
+		}
+	},
 }
 
 func NewListArgs() *ListArgs {
@@ -71,9 +62,6 @@ func NewListArgs() *ListArgs {
 		ShowOpt:   ShowConstrained,
 		Color:     isatty.IsTerminal(os.Stdout.Fd()),
 		ReadFiles: []string{},
-	}
-	args.OnHelp = func() {
-		HelpAndExit("nix-versions", 0)
 	}
 	args.OnRead = func(file string) {
 		args.ReadFiles = append(args.ReadFiles, file)
