@@ -28,15 +28,17 @@ const (
 )
 
 type ListArgs struct {
-	OnHelp         func() `long:"help" short:"h"`
-	OnJSON         func() `long:"json" short:"j"`
-	OnText         func() `long:"text" short:"t"`
-	OnInstallable  func() `long:"installable" short:"i"`
-	OnFlake        func() `long:"flake" short:"f"`
-	OnAll          func() `long:"all" short:"a"`
-	OnOne          func() `long:"one" short:"1"`
-	OnNixHub       func() `long:"nixhub" short:"n"`
-	OnLazamar      func() `long:"lazamar" short:"l"`
+	OnHelp         func()       `long:"help" short:"h"`
+	OnJSON         func()       `long:"json" short:"j"`
+	OnText         func()       `long:"text" short:"t"`
+	OnInstallable  func()       `long:"installable" short:"i"`
+	OnFlake        func()       `long:"flake" short:"f"`
+	OnAll          func()       `long:"all" short:"a"`
+	OnOne          func()       `long:"one" short:"1"`
+	OnNixHub       func()       `long:"nixhub" short:"n"`
+	OnLazamar      func()       `long:"lazamar" short:"l"`
+	OnRead         func(string) `long:"read" short:"r"`
+	ReadFiles      []string
 	OutFmt         OutFmt
 	ShowOpt        ShowOpt
 	LazamarChannel *string `long:"channel" short:"c"`
@@ -65,12 +67,16 @@ func HelpAndExit(name string, exitCode int) {
 
 func NewListArgs() *ListArgs {
 	args := ListArgs{
-		OutFmt:  OutText,
-		ShowOpt: ShowConstrained,
-		Color:   isatty.IsTerminal(os.Stdout.Fd()),
+		OutFmt:    OutText,
+		ShowOpt:   ShowConstrained,
+		Color:     isatty.IsTerminal(os.Stdout.Fd()),
+		ReadFiles: []string{},
 	}
 	args.OnHelp = func() {
 		HelpAndExit("nix-versions", 0)
+	}
+	args.OnRead = func(file string) {
+		args.ReadFiles = append(args.ReadFiles, file)
 	}
 	args.OnJSON = func() {
 		args.OutFmt = OutJSON

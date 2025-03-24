@@ -1,10 +1,14 @@
 package list
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/rodaine/table"
@@ -16,6 +20,17 @@ import (
 )
 
 func (a *ListArgs) Run() error {
+	for _, file := range a.ReadFiles {
+		var (
+			more []string
+			err  error
+		)
+		if more, err = ReadSpecs(file); err != nil {
+			return err
+		}
+		a.rest = append(a.rest, more...)
+	}
+
 	specs, err := search_spec.ParseSearchSpecs(a.rest, a.LazamarChannel)
 	if err != nil {
 		return err
@@ -146,4 +161,30 @@ func (a *ListArgs) TextOut(res search.PackageSearchResults) (string, error) {
 
 	tbl.Print()
 	return buff.String(), nil
+}
+
+var RegexLine = regexp.MustCompile(`^[ ]*([^# ]+#?[^ #]+)`)
+
+func readSpecs(file *os.File) ([]string, error) {
+	specs := []string{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if spec := RegexLine.FindString(line); len(spec) > 0 {
+			specs = append(specs, spec)
+		}
+	}
+	return specs, nil
+}
+
+func ReadSpecs(file string) ([]string, error) {
+	if file == "-" {
+		return readSpecs(os.Stdin)
+	}
+	fd, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer fd.Close()
+	return readSpecs(fd)
 }
