@@ -91,7 +91,7 @@ func (a *AppArgs) ParseAndRun(args []string) error {
 		return new.NewInitArgs().ParseAndRun(extra[1:])
 	}
 
-	if cmd == "list" {
+	if cmd == "list" || cmd == "ls" {
 		return list.NewListArgs().ParseAndRun(extra[1:])
 	}
 
