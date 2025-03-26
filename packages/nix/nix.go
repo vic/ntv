@@ -7,7 +7,7 @@ import (
 	"slices"
 )
 
-type JsonMap = map[string]interface{}
+type JsonMap = map[string]any
 
 var (
 	flakes_enabled []string
@@ -109,7 +109,6 @@ func InstallablePackageVersion(installable string) (*PackageVersion, error) {
 	if err != nil {
 		return nil, err
 	}
-	type JsonMap = map[string]interface{}
 	obj := JsonMap{}
 	err = json.Unmarshal([]byte(out), &obj)
 	if err != nil {
