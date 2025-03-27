@@ -46,5 +46,5 @@ func FlakeCode(f *flake.Context, res search.PackageSearchResults) (string, error
 		f.AddTool(r)
 	}
 
-	return f.Render()
+	return f.Render(true)
 }

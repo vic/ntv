@@ -126,14 +126,17 @@ func unpackArray[S ~[]E, E any](s S) []any {
 	return r
 }
 
-func (c *Context) Render() (string, error) {
+func (c *Context) Render(canRunNix bool) (string, error) {
 	jsonBytes, err := json.Marshal(c)
 	if err != nil {
 		return "", err
 	}
-	nixCode, err := nix.JsonToNix(string(jsonBytes))
-	if err != nil {
-		return "", err
+	var nixCode = "(builtins.fromJSON ''" + string(jsonBytes) + "'')"
+	if canRunNix {
+		nixCode, err = nix.JsonToNix(string(jsonBytes))
+		if err != nil {
+			return "", err
+		}
 	}
 
 	buff := bytes.Buffer{}
@@ -172,5 +175,13 @@ func (c *Context) Render() (string, error) {
 	w(2, "];")
 	w(1, "};")
 	w(0, "}")
-	return nix.NixfmtCode(buff.String())
+
+	var code = buff.String()
+	if canRunNix {
+		code, err = nix.NixfmtCode(code)
+		if err != nil {
+			return "", err
+		}
+	}
+	return code, nil
 }
