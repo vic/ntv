@@ -13,7 +13,7 @@ import (
 	"github.com/vic/ntv/packages/app/new"
 )
 
-//go:embed HELP
+//go:embed HELP.txt
 var HELP string
 
 //go:embed VERSION
