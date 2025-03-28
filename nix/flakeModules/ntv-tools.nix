@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ lib, ... }:
 {
   options.ntv.tools = lib.mkOption {
     description = "Tools pinned to specific versions by ntv.";

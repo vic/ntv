@@ -5,7 +5,7 @@
 # Having this schema exported in at the output `lib.ntv`
 # so that ntv can later load it and modify it as needed
 # in the go runtime. And possibly generate an updated flake.
-{ lib, config, ... }:
+{ lib, ... }:
 {
   options.ntv.flake = lib.mkOption {
     description = "Flake generator data for ntv.";
