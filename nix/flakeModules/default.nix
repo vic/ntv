@@ -1,15 +1,15 @@
-{ ... }:
+{ inputs, ... }:
 {
-
   imports = [
+    inputs.ntv.inputs.flake-parts.flakeModules.flakeModules
+    inputs.ntv.inputs.flake-parts.flakeModules.modules
     ./ntv.nix
+    ./packages.nix
+    ./nixpkgs-shell.nix
+    ./devshell-shell.nix
+    ./devenv-shell.nix
+    ./default-shell.nix
   ];
 
-  perSystem = (
-    { inputs', ... }:
-    {
-      packages.nvs = inputs'.ntv.packages.default;
-    }
-  );
-
+  config.flake.modules = { };
 }
