@@ -2,6 +2,6 @@
 
 {
 
-  flake.overlays.default = final: prev: inputs.self.packages.${prev.system}.default.versioned;
-  
+  flake.overlays.default = _final: prev: inputs.self.packages.${prev.system}.default.versioned;
+
 }
