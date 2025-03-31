@@ -163,14 +163,38 @@ func (a *ListArgs) TextOut(res search.PackageSearchResults) (string, error) {
 	return buff.String(), nil
 }
 
-var RegexLine = regexp.MustCompile(`^[ ]*([^# ]+#?[^ #]+)`)
+var SpecRegexLine = regexp.MustCompile(`([^ ]+[^#]+)`)
+
+func specFromLine(str string) (string, error) {
+	str = strings.TrimSpace(str)
+	if len(str) == 0 {
+		return "", nil
+	}
+	if spec := SpecRegexLine.FindString(str); len(spec) > 0 {
+		spec := strings.TrimSpace(spec)
+		if strings.HasPrefix(spec, "#") { // a comment on file
+			return "", nil
+		}
+		if !strings.Contains(spec, "@") {
+			first_space := regexp.MustCompile(`\s+`).FindString(spec)
+			if first_space != "" {
+				spec = strings.Replace(spec, first_space, "@", 1)
+			}
+		}
+		return spec, nil
+	}
+	return "", fmt.Errorf("invalid package-spec: %s", str)
+}
 
 func readSpecs(file *os.File) ([]string, error) {
 	specs := []string{}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if spec := RegexLine.FindString(line); len(spec) > 0 {
+		spec, err := specFromLine(scanner.Text())
+		if err != nil {
+			return nil, err
+		}
+		if len(spec) > 0 {
 			specs = append(specs, spec)
 		}
 	}
