@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/vic/ntv/packages/lazamar"
+	"github.com/vic/ntv/packages/backends/lazamar"
+	"github.com/vic/ntv/packages/backends/nixhub"
 	"github.com/vic/ntv/packages/nix"
-	"github.com/vic/ntv/packages/nixhub"
 	ss "github.com/vic/ntv/packages/search_spec"
 	lib "github.com/vic/ntv/packages/versions"
 )

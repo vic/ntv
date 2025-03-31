@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/vic/ntv/packages/nixsearch"
+	"github.com/vic/ntv/packages/backends/nixsearch"
 	"golang.org/x/sync/errgroup"
 )
 
