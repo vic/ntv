@@ -23,5 +23,7 @@
         inherit ntv;
       };
 
+      checks.ntv = ntv;
+
     };
 }

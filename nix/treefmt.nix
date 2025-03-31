@@ -1,9 +1,11 @@
 { inputs, ... }:
 {
+  imports = [ inputs.treefmt-nix.flakeModule ];
+
   perSystem = (
-    { pkgs, ... }:
-    let
-      treefmt = inputs.treefmt-nix.lib.evalModule pkgs {
+    { ... }:
+    {
+      treefmt = {
         projectRootFile = "flake.nix";
         programs.nixfmt.enable = true;
         programs.nixfmt.excludes = [ ".direnv" ];
@@ -12,12 +14,6 @@
         programs.yamlfmt.enable = true;
         programs.gofmt.enable = true;
       };
-      treefmt-wrapper = treefmt.config.build.wrapper;
-      treefmt-check = treefmt.config.build.check ./..;
-    in
-    {
-      formatter = treefmt-wrapper;
-      checks.treefmt = treefmt-check;
     }
   );
 }
