@@ -54,7 +54,7 @@ func New() *Context {
 				},
 				{
 					Name:  "ntv",
-					Url:   "github:vic/ntv",
+					Url:   "github:vic/ntv?dir=nix/flakeModules",
 					Flake: true,
 					Follows: []Follow{{
 						Input:  "nixpkgs",

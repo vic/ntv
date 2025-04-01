@@ -7,9 +7,7 @@
     ./ntv-tools.nix
     ./packages.nix
     ./overlays.nix
-    ./nixpkgs-shell.nix
     ./devshell-shell.nix
-    ./devenv-shell.nix
     ./default-shell.nix
   ];
 
