@@ -7,6 +7,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/mattn/go-isatty"
 	"github.com/vic/ntv/packages/app/help"
+	"github.com/vic/ntv/packages/search_spec"
 )
 
 type OutFmt uint8
@@ -27,21 +28,23 @@ const (
 )
 
 type ListArgs struct {
-	OnJSON         func()       `long:"json" short:"j"`
-	OnText         func()       `long:"text" short:"t"`
-	OnInstallable  func()       `long:"installable" short:"i"`
-	OnFlake        func()       `long:"flake" short:"f"`
-	OnAll          func()       `long:"all" short:"a"`
-	OnOne          func()       `long:"one" short:"1"`
-	OnNixHub       func()       `long:"nixhub" short:"n"`
-	OnLazamar      func()       `long:"lazamar" short:"l"`
-	OnRead         func(string) `long:"read" short:"r"`
-	ReadFiles      []string
-	OutFmt         OutFmt
-	ShowOpt        ShowOpt
-	LazamarChannel *string `long:"channel" short:"c"`
-	Color          bool    `long:"color" short:"C"`
-	rest           []string
+	OnJSON           func()       `long:"json" short:"j"`
+	OnText           func()       `long:"text" short:"t"`
+	OnInstallable    func()       `long:"installable" short:"i"`
+	OnFlake          func()       `long:"flake" short:"f"`
+	OnAll            func()       `long:"all" short:"a"`
+	OnOne            func()       `long:"one" short:"1"`
+	OnNixHub         func()       `long:"nixhub"`
+	OnLazamar        func()       `long:"lazamar"`
+	OnNixPackagesCom func()       `long:"history"`
+	OnRead           func(string) `long:"read" short:"r"`
+	ReadFiles        []string
+	OutFmt           OutFmt
+	ShowOpt          ShowOpt
+	OnLazamarChannel func(string) `long:"channel"`
+	Color            bool         `long:"color" short:"C"`
+	versionsBackend  search_spec.VersionsBackend
+	rest             []string
 }
 
 //go:embed HELP
@@ -58,10 +61,11 @@ var Help = help.CmdHelp{
 
 func NewListArgs() *ListArgs {
 	args := ListArgs{
-		OutFmt:    OutText,
-		ShowOpt:   ShowConstrained,
-		Color:     isatty.IsTerminal(os.Stdout.Fd()),
-		ReadFiles: []string{},
+		OutFmt:          OutText,
+		ShowOpt:         ShowConstrained,
+		Color:           isatty.IsTerminal(os.Stdout.Fd()),
+		ReadFiles:       []string{},
+		versionsBackend: search_spec.VersionsBackend{NixHub: &search_spec.Unit{}},
 	}
 	args.OnRead = func(file string) {
 		args.ReadFiles = append(args.ReadFiles, file)
@@ -85,14 +89,21 @@ func NewListArgs() *ListArgs {
 		args.ShowOpt = ShowOne
 	}
 	args.OnNixHub = func() {
-		args.LazamarChannel = nil
+		args.versionsBackend = search_spec.VersionsBackend{NixHub: &search_spec.Unit{}}
 	}
 	args.OnLazamar = func() {
-		if args.LazamarChannel == nil {
-			channel := "nixpkgs-unstable"
-			args.LazamarChannel = &channel
+		if args.versionsBackend.LazamarChannel != nil {
+			return
 		}
+		args.OnLazamarChannel("nixpkgs-unstable")
 	}
+	args.OnLazamarChannel = func(channel string) {
+		args.versionsBackend = search_spec.VersionsBackend{LazamarChannel: (*search_spec.LazamarChannel)(&channel)}
+	}
+	args.OnNixPackagesCom = func() {
+		args.versionsBackend = search_spec.VersionsBackend{NixPackagesCom: &search_spec.Unit{}}
+	}
+
 	return &args
 }
 

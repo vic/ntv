@@ -15,7 +15,7 @@ func (a *InitArgs) Run() error {
 		f.Flake.OverrideInput("ntv", a.NtvFlake)
 	}
 
-	specs, err := search_spec.ParseSearchSpecs(a.rest, a.LazamarChannel)
+	specs, err := search_spec.ParseSearchSpecs(a.rest, a.versionsBackend)
 	if err != nil {
 		return err
 	}

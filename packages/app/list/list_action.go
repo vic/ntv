@@ -31,7 +31,7 @@ func (a *ListArgs) Run() error {
 		a.rest = append(a.rest, more...)
 	}
 
-	specs, err := search_spec.ParseSearchSpecs(a.rest, a.LazamarChannel)
+	specs, err := search_spec.ParseSearchSpecs(a.rest, a.versionsBackend)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func InstallableOut(res search.PackageSearchResults) (string, error) {
 
 	buff := bytes.Buffer{}
 	for _, r := range res {
-		fmt.Fprintf(&buff, "%s\n", r.Installable())
+		fmt.Fprintf(&buff, "%s\n", r.Installable(r.Selected))
 	}
 	return buff.String(), nil
 }
@@ -115,46 +115,54 @@ func InstallableOut(res search.PackageSearchResults) (string, error) {
 func (a *ListArgs) TextOut(res search.PackageSearchResults) (string, error) {
 	color.NoColor = !a.Color
 
-	nocolor := color.New(color.FgWhite)
-	constrainedColor := color.New(color.FgCyan)
-	selectedColor := color.New(color.FgHiGreen)
-
-	hd := nocolor.SprintfFunc()
+	hd := color.New(color.Faint).SprintfFunc()
 
 	buff := bytes.Buffer{}
-	tbl := table.New(hd("Name"), hd("Attribute"), hd("Version"), hd("Flake"), hd("Revision")).WithWriter(&buff)
+	tbl := table.New(hd("Name"), hd("Version"), hd("NixInstallable"), hd("VerBackend")).WithWriter(&buff)
 
 	for _, r := range res {
+		if a.ShowOpt == ShowConstrained && r.Selected == nil {
+			continue
+		}
+
 		for _, v := range r.Versions {
-			var otherColor = nocolor.SprintfFunc()
-			var versionColor = nocolor.SprintfFunc()
+			var nameColor = color.New(color.Faint).SprintfFunc()
+			var versionColor = color.New(color.Faint).SprintfFunc()
+			var installColor = color.New(color.Faint).SprintfFunc()
+			var backendColor = color.New(color.Faint).SprintfFunc()
 
 			isSelected := r.Selected == v
-			isConstrained := slices.Contains(r.Constrained, v)
-
-			if isConstrained {
-				versionColor = constrainedColor.SprintfFunc()
-			}
-
-			if isSelected {
-				versionColor = selectedColor.SprintfFunc()
-				otherColor = color.New(color.FgHiWhite).SprintfFunc()
-			}
 
 			if a.ShowOpt == ShowOne && !isSelected {
 				continue
 			}
 
-			if a.ShowOpt == ShowConstrained && !isConstrained && len(r.Constrained) > 0 {
+			if isSelected {
+				nameColor = color.New(color.Bold).SprintfFunc()
+				versionColor = color.New(color.FgHiGreen).SprintfFunc()
+				installColor = color.New(color.ReverseVideo).SprintfFunc()
+			}
+
+			isConstrained := !isSelected && slices.Contains(r.Constrained, v)
+
+			if isConstrained && len(r.Constrained) < len(r.Versions) {
+				versionColor = color.New(color.FgCyan).SprintfFunc()
+			}
+
+			if a.ShowOpt == ShowConstrained && !isConstrained && !isSelected {
 				continue
 			}
 
+			name := v.Name
+			if r.Package != nil {
+				name = r.Package.AttrName
+			}
+			backend := r.FromSearch.VersionsBackend.String()
 			tbl.AddRow(
-				otherColor(v.Name),
-				otherColor(v.Attribute),
+				nameColor(name),
 				versionColor(v.Version),
-				otherColor(v.Flake),
-				otherColor(v.Revision),
+				installColor(r.Installable(v)),
+				backendColor(backend),
 			)
 		}
 	}

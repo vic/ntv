@@ -1,3 +1,4 @@
+{ ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -14,7 +15,6 @@
           mainProgram = "ntv";
         };
       };
-
     in
     {
 
@@ -23,7 +23,7 @@
         inherit ntv;
       };
 
-      checks.ntv = ntv;
+      checks = { inherit ntv; };
 
     };
 }

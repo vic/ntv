@@ -5,14 +5,17 @@ import (
 
 	"github.com/jessevdk/go-flags"
 	"github.com/vic/ntv/packages/app/help"
+	"github.com/vic/ntv/packages/search_spec"
 )
 
 type InitArgs struct {
-	OnNixHub       func()  `long:"nixhub" short:"n"`
-	OnLazamar      func()  `long:"lazamar" short:"l"`
-	LazamarChannel *string `long:"channel" short:"c"`
-	NtvFlake       string  `long:"override-ntv"`
-	rest           []string
+	OnNixHub         func()       `long:"nixhub" short:"n"`
+	OnLazamar        func()       `long:"lazamar" short:"l"`
+	OnLazamarChannel func(string) `long:"channel" short:"c"`
+	OnNixPackagesCom func()       `long:"history" short:"h"`
+	NtvFlake         string       `long:"override-ntv"`
+	versionsBackend  search_spec.VersionsBackend
+	rest             []string
 }
 
 //go:embed HELP
@@ -28,15 +31,26 @@ var Help = help.CmdHelp{
 }
 
 func NewInitArgs() *InitArgs {
-	args := InitArgs{}
+	args := InitArgs{
+		versionsBackend: search_spec.VersionsBackend{
+			NixHub: &search_spec.Unit{},
+		},
+	}
+
 	args.OnNixHub = func() {
-		args.LazamarChannel = nil
+		args.versionsBackend = search_spec.VersionsBackend{NixHub: &search_spec.Unit{}}
 	}
 	args.OnLazamar = func() {
-		if args.LazamarChannel == nil {
-			channel := "nixpkgs-unstable"
-			args.LazamarChannel = &channel
+		if args.versionsBackend.LazamarChannel != nil {
+			return
 		}
+		args.OnLazamarChannel("nixpkgs-unstable")
+	}
+	args.OnLazamarChannel = func(channel string) {
+		args.versionsBackend = search_spec.VersionsBackend{LazamarChannel: (*search_spec.LazamarChannel)(&channel)}
+	}
+	args.OnNixPackagesCom = func() {
+		args.versionsBackend = search_spec.VersionsBackend{NixPackagesCom: &search_spec.Unit{}}
 	}
 	return &args
 }

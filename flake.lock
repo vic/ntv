@@ -1,5 +1,37 @@
 {
   "nodes": {
+    "bats-assert": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1742639935,
+        "narHash": "sha256-5xHWCp7fnM/UfFDQoQ03AVVevlidsenZw30eDAHtTQ8=",
+        "owner": "bats-core",
+        "repo": "bats-assert",
+        "rev": "b93143a1bfbde41d9b7343aab0d36f3ef6549e6b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bats-core",
+        "repo": "bats-assert",
+        "type": "github"
+      }
+    },
+    "bats-support": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1481062092,
+        "narHash": "sha256-5sVpojS4mHREfSgOblWCdQ+VKMWhnO0P62gzORSVpos=",
+        "owner": "ztombol",
+        "repo": "bats-support",
+        "rev": "004e707638eedd62e0481e8cdc9223ad471f12ee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ztombol",
+        "repo": "bats-support",
+        "type": "github"
+      }
+    },
     "cachix": {
       "inputs": {
         "devenv": [
@@ -289,6 +321,8 @@
     },
     "root": {
       "inputs": {
+        "bats-assert": "bats-assert",
+        "bats-support": "bats-support",
         "devenv": "devenv",
         "devshell": "devshell",
         "flake-parts": "flake-parts_2",

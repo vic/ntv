@@ -2,67 +2,36 @@ package nixsearch
 
 import (
 	"context"
-	"slices"
 
 	lib "github.com/peterldowns/nix-search-cli/pkg/nixsearch"
 )
 
-func FindPackagesWithQuery(maxRes int, search string) ([]string, error) {
-	var limit int
-	if maxRes < 0 {
-		limit = max(maxRes*-1, 10)
-	} else {
-		limit = max(maxRes, 10)
-	}
+// nixos-search elastic indexes.
+// https://github.com/NixOS/nixos-search/blob/main/flake-info/src/elastic.rs
+type Package = lib.Package
+
+func FindPackagesWithAttr(maxRes int, search string) ([]lib.Package, error) {
 	query := lib.Query{
-		MaxResults: limit,
-		Channel:    "unstable",
-		Search:     &lib.MatchSearch{Search: search},
+		MaxResults:  maxRes,
+		Channel:     "unstable",
+		QueryString: &lib.MatchQueryString{QueryString: "package_attr_name: " + search},
 	}
 	client, err := lib.NewElasticSearchClient()
 	if err != nil {
 		return nil, err
 	}
-	packages, err := client.Search(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, pkg := range packages {
-		names = append(names, pkg.AttrName)
-	}
-	return names, nil
+	return client.Search(context.Background(), query)
 }
 
-func FindPackagesWithProgram(maxRes int, exact bool, program string) ([]string, error) {
-	var limit int
-	if maxRes < 0 {
-		limit = max(maxRes*-1, 10)
-	} else {
-		limit = max(maxRes, 10)
-	}
+func FindPackagesWithProgram(maxRes int, program string) ([]lib.Package, error) {
 	query := lib.Query{
-		MaxResults: limit,
-		Channel:    "unstable",
-		Program:    &lib.MatchProgram{Program: program},
+		MaxResults:  maxRes,
+		Channel:     "unstable",
+		QueryString: &lib.MatchQueryString{QueryString: "package_programs: " + program},
 	}
 	client, err := lib.NewElasticSearchClient()
 	if err != nil {
 		return nil, err
 	}
-	packages, err := client.Search(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, pkg := range packages {
-		if exact {
-			if slices.Contains(pkg.Programs, program) {
-				names = append(names, pkg.AttrName)
-			}
-		} else {
-			names = append(names, pkg.AttrName)
-		}
-	}
-	return names, nil
+	return client.Search(context.Background(), query)
 }

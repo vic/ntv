@@ -10,5 +10,9 @@
     devshell.inputs.nixpkgs.follows = "nixpkgs";
     devenv.url = "github:cachix/devenv";
     devenv.inputs.nixpkgs.follows = "nixpkgs";
+    bats-support.url = "github:ztombol/bats-support";
+    bats-support.flake = false;
+    bats-assert.url = "github:bats-core/bats-assert";
+    bats-assert.flake = false;
   };
 }

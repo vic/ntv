@@ -8,9 +8,12 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/vic/ntv/packages/backends/lazamar"
+	"github.com/vic/ntv/packages/backends/nix_packages_com"
 	"github.com/vic/ntv/packages/backends/nixhub"
+	"github.com/vic/ntv/packages/backends/nixsearch"
 	"github.com/vic/ntv/packages/nix"
 	ss "github.com/vic/ntv/packages/search_spec"
+	"github.com/vic/ntv/packages/versions"
 	lib "github.com/vic/ntv/packages/versions"
 )
 
@@ -22,19 +25,82 @@ type PackageSearchResult struct {
 	Versions    []*lib.Version
 	Constrained []*lib.Version
 	Selected    *lib.Version
+	Package     *nixsearch.Package
 }
 
 type PackageSearchResults []*PackageSearchResult
 
-func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
+func (s *PackageSearchSpec) findNixpkgs() ([]nixsearch.Package, error) {
 	var (
-		result   *PackageSearchResult
+		pkgs []nixsearch.Package
+		err  error
+	)
+	if strings.HasPrefix(*s.Query, "bin/") {
+		program := strings.TrimPrefix(*s.Query, "bin/")
+		pkgs, err = nixsearch.FindPackagesWithProgram(10, program)
+		if err != nil {
+			return nil, err
+		}
+		if len(pkgs) < 1 {
+			return nil, fmt.Errorf("no packages found providing program `bin/%s`. try using `bin/*%s*`", program, program)
+		}
+	} else {
+		pkgs, err = nixsearch.FindPackagesWithAttr(10, *s.Query)
+		if err != nil {
+			return nil, err
+		}
+		if len(pkgs) < 1 {
+			return nil, fmt.Errorf("no packages found for attribute-path `%s`. try using `*%s*`", *s.Query, *s.Query)
+		}
+	}
+	return pkgs, nil
+}
+
+func (s *PackageSearchSpec) isNotNixpkgs() bool {
+	return s.VersionsBackend != nil && s.VersionsBackend.FlakeInstallable != nil
+}
+
+func (s *PackageSearchSpec) Search() ([]*PackageSearchResult, error) {
+	if s.isNotNixpkgs() {
+		res, err := s.searchVersions(nil)
+		if err != nil {
+			return nil, err
+		}
+		return []*PackageSearchResult{res}, nil
+	}
+
+	pkgs, err := s.findNixpkgs()
+	if err != nil {
+		return nil, err
+	}
+	group, _ := errgroup.WithContext(context.Background())
+	acc := make([]*PackageSearchResult, len(pkgs))
+	for i, pkg := range pkgs {
+		i, pkg := i, pkg
+		group.Go(func() error {
+			res, err := s.searchVersions(&pkg)
+			if err != nil {
+				return err
+			}
+			acc[i] = res
+			return nil
+		})
+	}
+	if err := group.Wait(); err != nil {
+		return nil, err
+	}
+	return acc, nil
+}
+
+func (s *PackageSearchSpec) searchVersions(pkg *nixsearch.Package) (*PackageSearchResult, error) {
+	var (
 		versions []*lib.Version
+		result   *PackageSearchResult
 		err      error
 	)
 
 	if s.VersionsBackend.CurrentNixpkgs != nil {
-		installable := "nixpkgs#" + *s.Query
+		installable := "nixpkgs#" + pkg.AttrName
 		pv, err := nix.InstallablePackageVersion(installable)
 		if err != nil {
 			return nil, err
@@ -42,7 +108,7 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 		one := lib.Version{
 			Name:      pv.PackageName,
 			Version:   pv.Version,
-			Attribute: *s.Query,
+			Attribute: pkg.AttrName,
 			Flake:     "nixpkgs",
 			Revision:  "",
 		}
@@ -74,14 +140,20 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 		versions = []*lib.Version{&one}
 	}
 
+	if s.VersionsBackend.NixPackagesCom != nil {
+		if versions, err = nix_packages_com.Search(pkg.AttrName); err != nil {
+			return nil, err
+		}
+	}
+
 	if s.VersionsBackend.NixHub != nil {
-		if versions, err = nixhub.Search(*s.Query); err != nil {
+		if versions, err = nixhub.Search(pkg.AttrName); err != nil {
 			return nil, err
 		}
 	}
 
 	if s.VersionsBackend.LazamarChannel != nil {
-		if versions, err = lazamar.Search(*s.Query, string(*s.VersionsBackend.LazamarChannel)); err != nil {
+		if versions, err = lazamar.Search(pkg.AttrName, string(*s.VersionsBackend.LazamarChannel)); err != nil {
 			return nil, err
 		}
 	}
@@ -92,19 +164,23 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 		FromSearch:  s,
 		Versions:    versions,
 		Constrained: []*lib.Version{},
+		Package:     pkg,
 	}
 
+	var constraint = ""
 	if s.VersionConstraint != nil {
-		result.Constrained, err = lib.ConstraintBy(versions, *s.VersionConstraint)
-		if err != nil {
-			return nil, err
-		}
+		constraint = *s.VersionConstraint
+	}
+
+	result.Constrained, err = lib.ConstraintBy(versions, constraint)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(result.Constrained) > 0 {
 		result.Selected = result.Constrained[len(result.Constrained)-1]
-	} else if len(versions) > 0 {
-		result.Selected = versions[len(versions)-1]
+	} else {
+		result.Selected = nil
 	}
 
 	return result, nil
@@ -112,22 +188,26 @@ func (s *PackageSearchSpec) Search() (*PackageSearchResult, error) {
 
 func (ss PackageSearchSpecs) Search() (PackageSearchResults, error) {
 	group, _ := errgroup.WithContext(context.Background())
-	results := make([]*PackageSearchResult, len(ss))
+	results := make([][]*PackageSearchResult, len(ss))
 	for i, s := range ss {
 		i, s := i, (*PackageSearchSpec)(s)
 		group.Go(func() error {
-			result, err := s.Search()
+			res, err := s.Search()
 			if err != nil {
 				return err
 			}
-			results[i] = result
+			results[i] = res
 			return nil
 		})
 	}
 	if err := group.Wait(); err != nil {
 		return nil, err
 	}
-	return results, nil
+	var res []*PackageSearchResult
+	for _, r := range results {
+		res = append(res, r...)
+	}
+	return res, nil
 }
 
 func (r PackageSearchResults) EnsureOneSelected() error {
@@ -162,14 +242,22 @@ func (r PackageSearchResults) Size() int {
 	return size
 }
 
-func (r PackageSearchResult) FlakeUrl() string {
-	var url = r.Selected.Flake
-	if len(r.Selected.Revision) > 0 {
-		url = fmt.Sprintf("%s/%s", r.Selected.Flake, r.Selected.Revision)
+func (r PackageSearchResult) FlakeUrl(v *versions.Version) string {
+	var url = v.Flake
+	if len(v.Revision) > 0 {
+		rev := v.Revision
+		if len(rev) == 40 {
+			rev = rev[:7]
+		}
+		url = fmt.Sprintf("%s/%s", v.Flake, rev)
 	}
 	return url
 }
 
-func (r PackageSearchResult) Installable() string {
-	return fmt.Sprintf("%s#%s", r.FlakeUrl(), r.Selected.Attribute)
+func (r PackageSearchResult) Installable(v *versions.Version) string {
+	outSelectors := ""
+	if r.FromSearch.OutputSelectors != nil {
+		outSelectors = "^" + strings.Join(r.FromSearch.OutputSelectors, ",")
+	}
+	return fmt.Sprintf("%s#%s%s", r.FlakeUrl(v), v.Attribute, outSelectors)
 }
