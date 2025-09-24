@@ -10,7 +10,7 @@
       # We use the tool attribute to access the tool's versioned package.
       # And place it under the same name in the package set.
       getTool =
-        name: tool:
+        _name: tool:
         let
           inputHasPackages = inputs.${tool.name} ? packages;
           input = inputs'.${tool.name};

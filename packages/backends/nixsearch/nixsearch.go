@@ -20,7 +20,12 @@ func FindPackagesWithAttr(maxRes int, search string) ([]lib.Package, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client.Search(context.Background(), query)
+	pkgs, err := client.Search(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	pkgs = lib.Deduplicate(pkgs)
+	return pkgs, nil
 }
 
 func FindPackagesWithProgram(maxRes int, program string) ([]lib.Package, error) {
@@ -33,5 +38,10 @@ func FindPackagesWithProgram(maxRes int, program string) ([]lib.Package, error) 
 	if err != nil {
 		return nil, err
 	}
-	return client.Search(context.Background(), query)
+	pkgs, err := client.Search(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	pkgs = lib.Deduplicate(pkgs)
+	return pkgs, nil
 }

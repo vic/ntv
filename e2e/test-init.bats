@@ -4,7 +4,7 @@ set -euo pipefail
 load "$BATS_LIB"
 
 function setup() {
-  INIT="ntv init --channel nixos-24.05 --override-ntv path:$PROJECT_ROOT/nix/flakeModules"
+  INIT="ntv init --channel nixos-25.05 --override-ntv path:$PROJECT_ROOT/nix/flakeModules"
   DIR="$(mktemp -d)"
   cd $DIR
   true
@@ -15,7 +15,7 @@ function teardown() {
 }
 
 @test 'create a flake' {
-  run $INIT hello@2.12.1
+  run $INIT hello@latest
   assert_success
   assert_output -p "This file was generated"
   assert_output -p "inputs.\"ntv\".url = \"path:$PROJECT_ROOT/nix/flakeModules\";"

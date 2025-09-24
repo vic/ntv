@@ -33,7 +33,7 @@
         ];
         text = ''
           (
-            cd "''${PROJECT_ROOT:-"$(git rev-parse --show-toplevel)"}"/
+            cd "''${PROJECT_ROOT:-"$(pwd)"}"/
             go run main.go "$@"
           )
         '';
@@ -53,7 +53,7 @@
         text = ''
           export BATS_LIB=${bats-lib}
           export LANG=en_US.UTF-8
-          PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+          PROJECT_ROOT="$(pwd)"
           export PROJECT_ROOT
           go mod vendor
           go mod tidy
